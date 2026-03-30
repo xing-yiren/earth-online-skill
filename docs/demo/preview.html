@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地球Online 闹钟系统 - 项目效果展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+        .showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border: 2px solid #667eea;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+            transition: transform 0.3s ease;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
+        }
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .greeting-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 15px;
+            border-left: 4px solid #FFD700;
+        }
+        .achievement-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        .settlement-section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .settlement-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #667eea;
+        }
+        .settlement-content {
+            font-size: 13px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        .rating-box {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 15px;
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+        }
+        .stars {
+            color: #FFD700;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        .features {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border: 2px solid #667eea;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2);
+            margin-bottom: 40px;
+        }
+        .features h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            border: 2px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        .feature-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .feature-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .feature-desc {
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.7;
+            border-top: 2px solid #667eea;
+            padding-top: 20px;
+        }
+        .system-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            .showcase {
+                grid-template-columns: 1fr;
+            }
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 地球Online 闹钟系统</h1>
+            <p>让每天的起床提示从"机械播报"变成"有温度的伙伴"</p>
+        </div>
+
+        <div class="showcase">
+            <!-- 早晨问候卡 -->
+            <div class="card">
+                <div class="card-title">🌅 早晨问候</div>
+                <div class="greeting-box">
+                    <div>玩家DemoUser，早上好</div>
+                    <div style="margin-top: 10px;">恭喜您成功通过昨日生存关卡！</div>
+                    <div style="margin-top: 10px;">当前您累积生存时长42天！</div>
+                    <div style="margin-top: 10px;">今日副本已开启，编号为2026-03-23</div>
+                    <div style="margin-top: 10px;">您今日所在地图：昆明</div>
+                    <div style="margin-top: 10px;">天气状况：晴朗，体感温度：18°C</div>
+                    <div style="margin-top: 10px;">当前机体储备能源为：85%</div>
+                    <div style="margin-top: 10px;">地球online提醒您，今日体力已刷新，请进行合理分配，完成任务可触发随机奖励～</div>
+                    <div style="margin-top: 10px;">祝您好运，万事顺遂</div>
+                    <div class="achievement-badge">
+                        🌅 早起战士 (连续7天) | +50经验值
+                    </div>
+                </div>
+                <div class="system-info">
+                    <strong>【随机事件触发】</strong><br>
+                    【幸运事件】咖啡店买一送一活动！获得+10幸福值 ☕
+                </div>
+            </div>
+
+            <!-- 每日结算卡 -->
+            <div class="card">
+                <div class="card-title">🎮 每日结算</div>
+                
+                <div class="settlement-section">
+                    <div class="settlement-title">【饱食度】100%</div>
+                    <div class="settlement-content">
+                        三碗米线 🍜<br>
+                        一碗米布<br>
+                        一份炸洋芋 🥔<br>
+                        两份炒米线 🍜
+                    </div>
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【饮水量】70%</div>
+                    <div class="settlement-content">
+                        两瓶小乔 💧<br>
+                        四瓶V8 🥤
+                    </div>
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【收入】-150元</div>
+                    <div class="settlement-content">
+                        米线: -30元<br>
+                        咖啡: -25元<br>
+                        健身房: -50元<br>
+                        其他消费: -45元
+                    </div>
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【突发事件】</div>
+                    <div class="settlement-content">
+                        在翠湖散步看见超雄老奶1v1对战！<br>
+                        获得: +20趣味值 😂
+                    </div>
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【心情指数】板扎 😎</div>
+                    <div class="settlement-content">
+                        早起度: <span class="stars">★★★★★</span><br>
+                        工作顺利度: <span class="stars">★★★★☆</span><br>
+                        生活满足度: <span class="stars">★★★★★</span><br>
+                        综合心情: 非常不错！
+                    </div>
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【今日成就】</div>
+                    <div class="settlement-content">
+                        🍜 米线先锋 (今日吃米线3次)<br>
+                        └─ 奖励: +30美食值 + 称号<br><br>
+                        🌅 早起战士 (连续早起7天)<br>
+                        └─ 奖励: +50经验值<br><br>
+                        🚶 翠湖漫步者 (散步超过1小时)<br>
+                        └─ 奖励: +20健康值
+                    </div>
+                </div>
+
+                <div class="rating-box">
+                    今日评分: S级
+                </div>
+
+                <div class="settlement-section">
+                    <div class="settlement-title">【评价】</div>
+                    <div class="settlement-content">
+                        完美的一天！米线满足！🎉
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心特性 -->
+        <div class="features">
+            <h2>✨ 核心特性</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-name">记忆驱动</div>
+                    <div class="feature-desc">记住你的重要事项，真正懂你</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-name">AI创意</div>
+                    <div class="feature-desc">每天不同的问候语，保持新鲜感</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-name">成就系统</div>
+                    <div class="feature-desc">游戏化激励，增强粘性</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-name">离线兜底</div>
+                    <div class="feature-desc">网络差也能用，可靠性高</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🌍 地球Online 闹钟系统 v2.0 | 让闹钟变成有温度的伙伴 | 游戏系统 + 生活化风格</p>
+        </div>
+    </div>
+</body>
+</html>

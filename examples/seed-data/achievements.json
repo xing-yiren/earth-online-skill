@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "stats": {
+    "survival_days": 42,
+    "early_bird_streak": 7,
+    "best_early_bird_streak": 14,
+    "last_early_bird_date": "2026-03-24",
+    "tasks_completed_total": 23,
+    "last_active_date": "2026-03-24"
+  },
+  "unlocked": [
+    {
+      "id": "early_bird_7",
+      "name": "早起战士",
+      "icon": "sunrise-warrior",
+      "reward_points": 50,
+      "reason": "连续早起达到7天",
+      "unlocked_at": "2026-03-24T07:00:00+08:00"
+    }
+  ]
+}
