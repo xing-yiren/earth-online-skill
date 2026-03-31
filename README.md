@@ -37,12 +37,14 @@ earth-online-skill/
 │   │   ├── host-adapter-spec.md      # Adapter 设计规范
 │   │   └── data-and-tools-spec.md    # 数据结构与工具接口规范
 │   ├── roadmap/
-│   │   └── init-and-adapter-plan.md  # init/onboarding 与 adapter 开发计划
+│   │   ├── init-and-adapter-plan.md  # init/onboarding 与 adapter 开发计划
+│   │   └── development-log.md        # 开发日志与阶段记录
 │   └── demo/
 │       └── preview.html              # 效果展示页
 ├── examples/
 │   └── seed-data/                    # 示例种子数据，用于初始化与测试
 ├── runtime/                          # 本地运行态数据根目录（默认不进 Git）
+├── adapters/                         # 宿主 adapter 层
 ├── scripts/
 │   ├── core/                         # 核心服务层
 │   ├── tools/                        # 工具入口层
@@ -87,6 +89,9 @@ python scripts/smoke_test.py
 - [Host Adapter 规范](docs/specs/host-adapter-spec.md)
 - [数据与工具接口规范](docs/specs/data-and-tools-spec.md)
 - [Init / Onboarding 与 Adapter 计划](docs/roadmap/init-and-adapter-plan.md)
+- [开发日志](docs/roadmap/development-log.md)
+- [Jiuwenclaw 对接说明](docs/hosts/jiuwenclaw-integration.md)
+- [Jiuwenclaw 测试用例](docs/testing/jiuwenclaw-test-cases.md)
 
 ## 下一步计划
 

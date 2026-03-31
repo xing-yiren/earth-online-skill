@@ -20,6 +20,7 @@ TASKS_FILE = DATA_ROOT / "tasks.json"
 POINTS_FILE = DATA_ROOT / "points.json"
 ACHIEVEMENTS_FILE = DATA_ROOT / "achievements.json"
 REWARDS_FILE = DATA_ROOT / "rewards.json"
+INIT_STATE_FILE = DATA_ROOT / ".earth_online_init.json"
 
 SEED_USER_FILE = SEED_DATA_ROOT / "USER.md"
 SEED_MEMORY_FILE = SEED_DATA_ROOT / "MEMORY.md"
