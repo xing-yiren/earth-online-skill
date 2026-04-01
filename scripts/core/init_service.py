@@ -26,27 +26,43 @@ class InitService:
         host_context = payload.get("host_context", {})
         initialized = self.is_initialized()
         current_profile = self._load_user_profile()
+        context_uncertainties = host_context.get("context", {}).get("uncertainties", [])
 
-        suggested_profile = {
-            "user_id": host_context.get("user", {}).get("id") or "demo-user",
-            "name": host_context.get("user", {}).get("name")
-            or current_profile["name"]
-            or DEFAULT_PLAYER_NAME,
-            "timezone": host_context.get("user", {}).get("timezone")
-            or current_profile["timezone"]
-            or DEFAULT_TIMEZONE,
-            "style": self._pick_style(host_context, current_profile),
+        trusted_name = host_context.get("user", {}).get("name")
+        if not trusted_name and initialized:
+            trusted_name = current_profile["name"]
+        if "user_name_missing" in context_uncertainties:
+            trusted_name = None
+
+        trusted_timezone = host_context.get("user", {}).get("timezone")
+        if not trusted_timezone and initialized:
+            trusted_timezone = current_profile["timezone"]
+        if "timezone_missing" in context_uncertainties:
+            trusted_timezone = None
+
+        fallback_defaults = {
+            "name": DEFAULT_PLAYER_NAME,
+            "timezone": DEFAULT_TIMEZONE,
+            "style": current_profile["style"] or DEFAULT_STYLE,
             "morning_target_time": current_profile["morning_target_time"] or "07:00",
             "early_bird_grace_minutes": int(
                 current_profile["early_bird_grace_minutes"] or 30
             ),
         }
 
+        suggested_profile = {
+            "user_id": host_context.get("user", {}).get("id") or "demo-user",
+            "name": trusted_name,
+            "timezone": trusted_timezone,
+            "style": self._pick_style(host_context, current_profile),
+            "morning_target_time": fallback_defaults["morning_target_time"],
+            "early_bird_grace_minutes": fallback_defaults["early_bird_grace_minutes"],
+        }
+
         required_fields = []
         optional_fields = []
         defaulted_fields = []
         recommended_questions = []
-        context_uncertainties = host_context.get("context", {}).get("uncertainties", [])
         if (
             not host_context.get("user", {}).get("name")
             or "user_name_missing" in context_uncertainties
@@ -110,9 +126,32 @@ class InitService:
             "recommended_questions": recommended_questions,
             "next_action": next_action,
             "context_uncertainties": context_uncertainties,
+            "fallback_defaults": fallback_defaults,
         }
 
     def apply_init_config(self, payload: dict) -> dict:
+        confirmed_by_user = payload.get("confirmed_by_user", False)
+        confirmed_fields = payload.get("confirmed_fields") or []
+        required_fields = payload.get("required_fields") or []
+
+        if not confirmed_by_user:
+            return {
+                "success": False,
+                "error": "confirmation_required",
+                "message": "Required onboarding fields must be explicitly confirmed by the user before initialization can be applied.",
+            }
+
+        unresolved_fields = [
+            field for field in required_fields if field not in confirmed_fields
+        ]
+        if unresolved_fields:
+            return {
+                "success": False,
+                "error": "required_fields_unresolved",
+                "message": "Some required onboarding fields have not been confirmed yet.",
+                "unresolved_fields": unresolved_fields,
+            }
+
         profile = {
             "user_id": payload.get("user_id") or "demo-user",
             "name": payload.get("name") or DEFAULT_PLAYER_NAME,
@@ -144,6 +183,7 @@ class InitService:
                 "morning_target_time": profile["morning_target_time"],
                 "early_bird_grace_minutes": profile["early_bird_grace_minutes"],
             },
+            "confirmed_fields": confirmed_fields,
         }
 
     def is_initialized(self) -> bool:

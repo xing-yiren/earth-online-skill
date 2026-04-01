@@ -95,6 +95,16 @@ python scripts/adapter_smoke_test.py
 5. 调用 `apply_init_config`
 6. 初始化完成后，才进入 `create_task` / `complete_task` / `get_morning_brief` 等主链路
 
+关键约束：
+
+- 如果 `init_skill_profile` 返回 `next_action = ask_required_fields`
+- 宿主不得直接跳过提问并完成初始化
+- 调用 `apply_init_config` 时，必须显式传入：
+  - `confirmed_by_user = true`
+  - `confirmed_fields = [...]`
+
+如果缺少这些确认信息，初始化应被拒绝，而不是使用默认值强行完成。
+
 ---
 
 ## 4. 当前已知问题
@@ -117,6 +127,18 @@ python scripts/adapter_smoke_test.py
 - 与地球Online 无关的近期消息
 
 这部分需要在后续版本里继续优化策略。
+
+### 4.3 seed data 必须保持干净
+
+当前仓库中的 `examples/seed-data/` 已按“新玩家模板”清理。
+
+在真实接入时，不应把 seed data 当作已有玩家存档展示给用户，否则会出现：
+
+- 初始积分异常偏高
+- 已有成就和 streak 被直接暴露
+- 预设任务被误当成真实玩家状态
+
+宿主接入时应把 seed data 只当作初始化模板，而不是用户当前状态。
 
 ---
 

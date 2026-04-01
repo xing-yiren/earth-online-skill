@@ -57,9 +57,24 @@
 - 补充 jiuwenclaw 文档：
   - 接入说明
   - 覆盖场景测试清单
+  - 对话式测试 prompts
 - 升级 `adapter_smoke_test.py` 输出：
   - 增加 `checks` 摘要
   - 更适合作为接入检查脚本
+- 清理 `examples/seed-data/` 为真正的新玩家模板：
+  - 初始积分归零
+  - 初始任务清空
+  - 初始成就清空
+  - memory 调整为中性模板
+- 为 onboarding 增加防呆约束：
+  - `apply_init_config` 需要 `confirmed_by_user = true`
+  - `required_fields` 未确认时拒绝执行
+- 调整 `init_skill_profile` 输出语义：
+  - 将不可信字段与 fallback 默认值拆开
+  - 不再把 `DemoUser` / `Asia/Shanghai` 误当成已确认用户信息
+- 更新 `smoke_test.py`：
+  - 改为先创建任务再完成任务
+  - 适配新的 clean seed data
 
 ### 当前状态
 
@@ -72,6 +87,7 @@
 - onboarding 已能消费 adapter 输出的不确定性信号
 - jiuwenclaw 已具备“对接说明 + 测试清单 + adapter 冒烟验证脚本”的第一版落地材料
 - `JiuwenclawAdapter -> init_skill_profile` 链路已经验证可用
+- 初始化链已开始具备“不能跳过必问项”的约束能力
 
 ### 下一步
 
@@ -82,6 +98,7 @@
 - 细化 onboarding 里的必问项、建议项与后置项
 - 开始抽象 `qclaw adapter` 的最小读取接口
 - 准备在 jiuwenclaw 宿主中做真实接入试验，并根据结果回收问题
+- 继续验证宿主在真实对话中是否遵守 onboarding 约束
 - 后续再推进：
   - `qclaw adapter`
   - `openclaw` 协议映射示例

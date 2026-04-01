@@ -55,13 +55,6 @@ def main() -> None:
                 "now": "2026-03-25T09:00:00+08:00",
             }
         ),
-        "complete_task": complete_task(
-            {
-                "task_query": "面试准备",
-                "date": "2026-03-25",
-                "now": "2026-03-25T14:00:00+08:00",
-            }
-        ),
         "morning_brief": get_morning_brief(
             {
                 "date": "2026-03-25",
@@ -70,17 +63,28 @@ def main() -> None:
                 },
             }
         ),
-        "daily_settlement": get_daily_settlement({"date": "2026-03-25"}),
         "list_rewards": list_rewards({"enabled_only": True}),
         "redeem_preview": redeem_reward({"reward_query": "看电影", "confirm": False}),
-        "redeem_confirm": redeem_reward(
-            {
-                "reward_query": "看电影",
-                "confirm": True,
-                "redeemed_at": "2026-03-25T22:00:00+08:00",
-            }
-        ),
     }
+
+    created_task_name = (
+        results["create_task"].get("task", {}).get("name", "整理周会纪要")
+    )
+    results["complete_task"] = complete_task(
+        {
+            "task_query": created_task_name,
+            "date": "2026-03-25",
+            "now": "2026-03-25T14:00:00+08:00",
+        }
+    )
+    results["daily_settlement"] = get_daily_settlement({"date": "2026-03-25"})
+    results["redeem_confirm"] = redeem_reward(
+        {
+            "reward_query": "看电影",
+            "confirm": True,
+            "redeemed_at": "2026-03-25T22:00:00+08:00",
+        }
+    )
 
     final_snapshot = {
         "tasks": json.loads(files["tasks"].read_text(encoding="utf-8")),

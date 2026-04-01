@@ -92,6 +92,7 @@ python scripts/smoke_test.py
 - [开发日志](docs/roadmap/development-log.md)
 - [Jiuwenclaw 对接说明](docs/hosts/jiuwenclaw-integration.md)
 - [Jiuwenclaw 测试用例](docs/testing/jiuwenclaw-test-cases.md)
+- [Jiuwenclaw 对话测试脚本](docs/testing/jiuwenclaw-dialogue-test-prompts.md)
 
 ## 下一步计划
 

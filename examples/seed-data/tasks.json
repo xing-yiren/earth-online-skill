@@ -1,63 +1,6 @@
 {
   "version": "1.0",
-  "task_counter": 4,
-  "tasks": [
-    {
-      "id": "task_0001",
-      "name": "完成项目报告",
-      "type": "main",
-      "recurrence": "once",
-      "status": "active",
-      "points": 80,
-      "deadline": "2026-03-25",
-      "created_at": "2026-03-24T10:00:00+08:00",
-      "updated_at": "2026-03-24T10:00:00+08:00",
-      "completed_at": null,
-      "last_completed_date": null,
-      "source": "agent"
-    },
-    {
-      "id": "task_0002",
-      "name": "面试准备",
-      "type": "main",
-      "recurrence": "once",
-      "status": "active",
-      "points": 100,
-      "deadline": "2026-03-25",
-      "created_at": "2026-03-24T10:00:00+08:00",
-      "updated_at": "2026-03-24T10:00:00+08:00",
-      "completed_at": null,
-      "last_completed_date": null,
-      "source": "agent"
-    },
-    {
-      "id": "task_0003",
-      "name": "晨跑",
-      "type": "side",
-      "recurrence": "daily",
-      "status": "active",
-      "points": 20,
-      "deadline": null,
-      "created_at": "2026-03-24T10:00:00+08:00",
-      "updated_at": "2026-03-24T10:00:00+08:00",
-      "completed_at": null,
-      "last_completed_date": null,
-      "source": "agent"
-    },
-    {
-      "id": "task_0004",
-      "name": "阅读30分钟",
-      "type": "side",
-      "recurrence": "daily",
-      "status": "active",
-      "points": 20,
-      "deadline": null,
-      "created_at": "2026-03-24T10:00:00+08:00",
-      "updated_at": "2026-03-24T10:00:00+08:00",
-      "completed_at": null,
-      "last_completed_date": null,
-      "source": "agent"
-    }
-  ],
+  "task_counter": 0,
+  "tasks": [],
   "completion_log": []
 }
