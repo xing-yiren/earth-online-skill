@@ -6,6 +6,15 @@ checks.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.tools._bootstrap import load_payload_from_argv, print_result
+
 from scripts.core.achievement_service import AchievementService
 from scripts.core.points_service import PointsService
 from scripts.core.task_service import TaskService
@@ -77,3 +86,7 @@ def run(payload: dict) -> dict:
         "achievement_reward_transactions": reward_transactions,
         "points_stats": final_stats,
     }
+
+
+if __name__ == "__main__":
+    print_result(run(load_payload_from_argv()))

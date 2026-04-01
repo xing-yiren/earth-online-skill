@@ -75,6 +75,14 @@
 - 更新 `smoke_test.py`：
   - 改为先创建任务再完成任务
   - 适配新的 clean seed data
+- 修复工具入口的可执行性：
+  - 为核心 tool 增加统一 bootstrap
+  - 支持从不同工作目录直接执行
+  - 降低 `ModuleNotFoundError: No module named 'scripts.core'` 风险
+- 修复 bootstrap 的自举顺序问题：
+  - 先注入项目根到 `sys.path`
+  - 再导入 `scripts.tools._bootstrap`
+  - 验证从仓库根与 `scripts/tools/` 目录直接执行均可工作
 
 ### 当前状态
 
