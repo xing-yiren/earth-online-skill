@@ -35,15 +35,6 @@ from scripts.tools.record_morning_checkin import run as record_morning_checkin
 from scripts.tools.redeem_reward import run as redeem_reward
 from scripts.tools.update_task import run as update_task
 from scripts.tools.cancel_task import run as cancel_task
-from scripts.renderers import (
-    render_daily_settlement,
-    render_morning_brief,
-    render_morning_checkin,
-    render_reward_list,
-    render_reward_preview,
-    render_task_completed,
-    render_task_created,
-)
 
 
 def main() -> None:
@@ -56,6 +47,7 @@ def main() -> None:
             {
                 "current_time": "2026-03-25T07:20:00+08:00",
                 "date": "2026-03-25",
+                "render": True,
             }
         ),
         "create_task": create_task(
@@ -65,21 +57,23 @@ def main() -> None:
                 "deadline": "2026-03-26",
                 "source": "smoke_test",
                 "now": "2026-03-25T09:00:00+08:00",
+                "render": True,
             }
         ),
         "morning_brief": get_morning_brief(
             {
                 "date": "2026-03-25",
+                "render": True,
                 "host_context": {
                     "user": {"name": "DemoUser", "timezone": "Asia/Shanghai"}
                 },
             }
         ),
-        "list_rewards": list_rewards({"enabled_only": True}),
+        "list_rewards": list_rewards({"enabled_only": True, "render": True}),
         "list_active_tasks": None,
         "update_task": None,
         "cancel_task": None,
-        "redeem_preview": redeem_reward({"reward_query": "看电影", "confirm": False}),
+        "redeem_preview": redeem_reward({"reward_query": "看电影", "render": True}),
     }
 
     results["list_active_tasks"] = list_active_tasks({"render": True})
@@ -116,32 +110,31 @@ def main() -> None:
             "task_query": created_task_name,
             "date": "2026-03-25",
             "now": "2026-03-25T14:00:00+08:00",
+            "render": True,
         }
     )
-    results["daily_settlement"] = get_daily_settlement({"date": "2026-03-25"})
+    results["daily_settlement"] = get_daily_settlement(
+        {
+            "date": "2026-03-25",
+            "player_name": "DemoUser",
+            "render": True,
+        }
+    )
     results["redeem_confirm"] = redeem_reward(
         {
             "reward_query": "看电影",
             "confirm": True,
             "redeemed_at": "2026-03-25T22:00:00+08:00",
+            "render": True,
         }
     )
 
     rendered = {
-        "morning_checkin": render_morning_checkin(results["morning_checkin"]),
-        "create_task": render_task_created(results["create_task"]),
-        "morning_brief": render_morning_brief(results["morning_brief"]),
-        "list_rewards": render_reward_list(results["list_rewards"]),
-        "redeem_preview": render_reward_preview(results["redeem_preview"]),
-        "list_active_tasks": results["list_active_tasks"].get("message"),
-        "update_task": results["update_task"].get("message"),
-        "cancel_task": results["cancel_task"].get("message"),
-        "complete_task": render_task_completed(results["complete_task"]),
-        "daily_settlement": render_daily_settlement(
-            results["daily_settlement"], player_name="DemoUser"
-        ),
-        "redeem_confirm": render_reward_preview(results["redeem_confirm"]),
+        key: value.get("message")
+        for key, value in results.items()
+        if isinstance(value, dict) and value.get("message")
     }
+    _assert_required_messages(rendered)
 
     final_snapshot = {
         "tasks": json.loads(files["tasks"].read_text(encoding="utf-8")),
@@ -174,6 +167,24 @@ def main() -> None:
         )
     )
 
+
+def _assert_required_messages(rendered: dict[str, str]) -> None:
+    required = [
+        "morning_checkin",
+        "create_task",
+        "morning_brief",
+        "list_rewards",
+        "redeem_preview",
+        "list_active_tasks",
+        "update_task",
+        "cancel_task",
+        "complete_task",
+        "daily_settlement",
+        "redeem_confirm",
+    ]
+    missing = [key for key in required if not rendered.get(key)]
+    if missing:
+        raise AssertionError(f"Missing rendered messages: {', '.join(missing)}")
 
 def _copy_data_files(tmpdir: Path) -> dict[str, Path]:
     files = {}

@@ -54,18 +54,24 @@ def render_reward_preview(result: dict) -> str:
             ]
         )
     if error == "insufficient_points":
-        required = result.get("required", 0)
+        reward = result.get("reward", {}) or {}
+        required = result.get("required", reward.get("cost", 0))
         current = result.get("current_points", 0)
-        return join_lines(
+        reward_name = reward.get("name")
+        lines = ["当前积分还不够兑换这个奖励。"]
+        if reward_name:
+            lines.append(f"【{reward_name}】需要 {required} 积分")
+        else:
+            lines.append(f"需要积分：{required}")
+        lines.extend(
             [
-                "当前积分还不够兑换这个奖励。",
-                f"需要积分：{required}",
                 f"当前积分：{current}",
                 f"还差：{max(required - current, 0)} 积分",
                 "",
                 "可以先完成一个主线任务，或者清几个支线任务再回来兑换。",
             ]
         )
+        return join_lines(lines)
     if error == "needs_confirmation":
         candidates = result.get("candidates") or []
         lines = ["匹配到多个奖励，请确认想兑换哪一个："]

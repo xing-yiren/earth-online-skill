@@ -49,9 +49,11 @@ def run(payload: dict) -> dict:
         source_id=reward["id"],
     )
     if not deduct_result.get("success"):
+        result = dict(deduct_result)
+        result["reward"] = reward
         if payload.get("render", False):
-            deduct_result["message"] = render_reward_preview(deduct_result)
-        return deduct_result
+            result["message"] = render_reward_preview(result)
+        return result
 
     current_points = deduct_result["stats"]["available_points"]
     record_result = reward_service.record_redemption(
