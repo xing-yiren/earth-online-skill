@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.task_service import TaskService
+from scripts.renderers import render_task_created
 
 
 DEFAULT_POINTS = {
@@ -57,12 +58,17 @@ def run(payload: dict) -> dict:
 
     result = TaskService().create_task(normalized_payload)
     if not result.get("success"):
+        if payload.get("render", False):
+            result["message"] = render_task_created(result)
         return result
 
-    return {
+    result = {
         "success": True,
         "task": result["task"],
     }
+    if payload.get("render", False):
+        result["message"] = render_task_created(result)
+    return result
 
 
 def _default_recurrence(task_type: str) -> str:

@@ -1,16 +1,15 @@
 ---
 name: earth-online-skill
 description: >
-  将用户的日常任务、晨间签到、积分、成就和奖励组织成“地球Online闯关”式体验的 Skill。
-  适用于 claw 类宿主平台中的生活游戏化、任务推进、每日结算、奖励兑换等场景。
+  将用户的日常任务、晨间签到、积分、成就和奖励组织成“地球Online闯关”式体验的 Claude Code Skill。
   当用户表达“早安/开启今天/今日副本/今天要做什么/我完成了某事/今天结算/兑换奖励”等意图时使用。
 ---
 
 # 地球Online Skill
 
-地球Online 是一个运行在宿主 Agent 之上的游戏化生活 Skill。
+地球Online 是一个优先运行在 Claude Code 中的游戏化生活 Skill。
 
-它不负责替代宿主的 memory、session 或意图识别，而是基于宿主提供的上下文，将用户的日常推进映射成：
+它把用户的日常推进映射成：
 
 - 今日副本
 - 主线 / 支线任务
@@ -19,124 +18,104 @@ description: >
 - 每日结算
 - 奖励兑换
 
+当前主路径是：
+
+```text
+Claude Code 对话
+  ↓
+识别用户意图
+  ↓
+调用 scripts/tools/*
+  ↓
+必要时使用 scripts/renderers/* 生成自然语言回复
+  ↓
+把游戏化反馈返回给用户
+```
+
+jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核心依赖。
+
 ## 何时使用
 
 当用户出现以下意图时，应考虑触发本 Skill：
 
 - 早安、开启今天、今日副本、今天有什么任务
-- 我今天要做某事、我想坚持某个习惯
+- 我今天要做某事、我想坚持某个习惯、以后每天做某事
 - 我完成了某事、我打卡了、今天做完了
+- 现在还有什么任务、今天还有什么
+- 改一下任务、取消某个任务、刚才记错了
 - 今天结算、今天做了什么、每日结算
 - 有什么奖励、我想兑换某个奖励
 
-## 宿主职责
+## Claude Code 使用规则
 
-宿主平台负责：
+在 Claude Code 中使用时：
 
-- 提供用户身份与 profile
-- 提供 memory、recent messages、session
-- 做自然语言理解与意图识别
-- 调用 Skill 工具
+1. 由 Claude 根据用户自然语言判断意图。
+2. 调用对应 `scripts/tools/*.py` 工具，优先传入 `render=true`。
+3. 如果工具结果包含 `message`，优先直接把 `message` 作为用户回复主体。
+4. 如果工具返回 `needs_confirmation`、`confirmation_required`、`task_not_found` 等状态，向用户确认，不要自行猜测。
+5. 不要直接编辑 `runtime/data/*.json`，除非是在修复数据问题；正常状态变更必须走工具入口。
+6. 早播报和晚结算的定时触发由 Claude Code 外层调度或用户主动触发，Skill 本体不自建常驻调度器。
 
-本 Skill 负责：
+## 常见意图与工具映射
 
-- 维护任务、积分、成就、奖励等私有状态
-- 输出游戏化反馈与结算结果
-- 在 runtime 中维护用户自己的 Skill 状态
+### 早安 / 开启今日副本
 
-## 输入前提
+推荐流程：
 
-本 Skill 优先依赖宿主传入的统一 `host_context`。
+1. 调用 `record_morning_checkin`，传入 `render=true`。
+2. 调用 `get_morning_brief`，传入 `render=true`。
+3. 合并两个工具的 `message` 回复用户。
 
-最小输入应至少包含：
+### 创建任务
 
-```json
-{
-  "host": { "platform": "some-claw-host" },
-  "user": { "id": "demo-user" },
-  "session": { "current_date": "2026-03-25" }
-}
-```
+用户表达未来意图时调用 `create_task`：
 
-如果宿主提供了更多上下文，Skill 可以进一步使用：
+- 主线任务通常是 `type=main`、`recurrence=once`
+- 支线习惯通常是 `type=side`、`recurrence=daily`
+- 如用户未指定积分，可使用工具默认积分
+- 传入 `render=true` 获取自然语言反馈
 
-- `user.name`
-- `user.timezone`
-- `intent.name`
-- `context.recent_messages`
-- `context.memory_facts`
-- `context.preferences`
-- `context.uncertainties`
+### 完成任务
+
+用户表达已完成时调用 `complete_task`：
+
+- 优先用明确任务 id
+- 没有 id 时用 `task_query`
+- 如果返回多候选，必须让用户确认
+- 成功后工具会联动任务状态、积分、成就奖励
+
+### 查看任务
+
+用户询问“我还有什么任务”时调用 `list_active_tasks`，传入 `render=true`。
+
+### 修改 / 取消任务
+
+用户想改名、改截止时间、改积分、改任务类型时调用 `update_task`。
+
+用户想删除、取消、不做某任务时调用 `cancel_task`。
+
+### 每日结算
+
+用户请求“今天结算 / 今天做了什么”时调用 `get_daily_settlement`，传入 `render=true`。
+
+### 奖励兑换
+
+用户查看奖励时调用 `list_rewards`，传入 `render=true`。
+
+用户请求兑换时调用 `redeem_reward`：
+
+- 第一次通常传 `confirm=false` 或不传 confirm
+- 如果返回 `confirmation_required`，向用户确认
+- 用户明确确认后再传 `confirm=true`
 
 ## 运行态约定
 
 - 仓库内示例数据位于 `examples/seed-data/`
 - 真实运行态位于 `runtime/data/`
 - 首次运行时，runtime 会从 seed data 初始化
-- onboarding / init 工具负责把宿主上下文转成用户自己的运行态配置
-- `apply_init_config` 只能在用户明确确认必填初始化字段后执行，不应以默认值跳过 onboarding
-
-## 核心行为
-
-### 1. 晨间签到
-
-当用户在晨间窗口内触发“早安 / 开启今天 / 今日副本”等行为时：
-
-- 记录晨间签到
-- 判断是否满足早起窗口
-- 更新 `early_bird_streak`
-- 检查相关成就
-
-注意：
-V1 中的“早起”表示**在晨间签到窗口内完成有效签到**，不等于真实生理起床时间。
-
-### 2. 创建任务
-
-当宿主识别到用户表达未来意图时：
-
-- 创建主线或支线任务
-- 默认主线偏 `once`
-- 默认支线偏 `daily`
-
-### 3. 完成任务
-
-当宿主识别到用户表达“已完成”时：
-
-- 更新任务状态
-- 增加积分
-- 更新成就统计
-- 补发新解锁成就奖励积分
-
-### 4. 每日结算
-
-当用户请求结算或宿主定时触发时：
-
-- 汇总今日完成情况
-- 汇总今日积分变化
-- 展示今日新成就
-- 返回明日仍待推进的任务
-
-### 5. 奖励兑换
-
-当用户请求查看或兑换奖励时：
-
-- 列出当前可用奖励
-- 在兑换前要求确认
-- 扣积分并记录兑换历史
-
-## 工具入口
-
-当前核心工具包括：
-
-- `init_skill_profile`
-- `apply_init_config`
-- `record_morning_checkin`
-- `create_task`
-- `complete_task`
-- `get_morning_brief`
-- `get_daily_settlement`
-- `list_rewards`
-- `redeem_reward`
+- 可用 `EARTH_ONLINE_DATA_ROOT` 指向临时数据目录进行测试
+- `USER.md` 保存用户配置，不保存任务、积分、成就状态
 
 ## Onboarding 约束
 
@@ -145,7 +124,7 @@ V1 中的“早起”表示**在晨间签到窗口内完成有效签到**，不�
 - `initialized = false`
 - `next_action = ask_required_fields`
 
-那么宿主必须：
+那么必须：
 
 1. 根据 `required_fields` 继续向用户提问
 2. 不得直接跳过到正常玩法
@@ -158,9 +137,31 @@ V1 中的“早起”表示**在晨间签到窗口内完成有效签到**，不�
 
 否则初始化工具应拒绝执行。
 
+## 宿主 adapter 定位
+
+跨宿主接入时，adapter 只负责把宿主私有结构转换成标准 `host_context`。
+
+推荐边界：
+
+```text
+宿主平台 / adapter
+  ↓
+统一 host_context
+  ↓
+earth-online-skill tools
+  ↓
+renderers
+  ↓
+宿主投递消息
+```
+
+不要让 core service 直接依赖 jiuwenclaw、openclaw 等宿主私有 memory 或 session 文件。
+
 ## 使用原则
 
-- 优先依赖宿主的语义理解，不在 Skill 内做强关键词硬解析
+- Claude Code 路径优先，先验证真实对话体验
+- core service 负责事实和状态，renderer 负责表达和体验
+- 优先使用结构化工具，不直接手写 JSON 状态
 - 让详细协议与数据结构留在 `docs/specs/`
 - 让宿主差异留在 adapter 层
 - 让 `SKILL.md` 保持短、清晰、可触发
@@ -169,8 +170,10 @@ V1 中的“早起”表示**在晨间签到窗口内完成有效签到**，不�
 
 需要详细信息时，再读取：
 
+- `docs/claude-code-usage.md`
+- `docs/testing/claude-code-dialogue-test-prompts.md`
 - `docs/product/v1-prd.md`
+- `docs/specs/data-and-tools-spec.md`
+- `docs/specs/scheduler-integration-spec.md`
 - `docs/specs/host-context-spec.md`
 - `docs/specs/host-adapter-spec.md`
-- `docs/specs/data-and-tools-spec.md`
-- `docs/roadmap/init-and-adapter-plan.md`

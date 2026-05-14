@@ -10,11 +10,15 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.reward_service import RewardService
+from scripts.renderers import render_reward_list
 
 
 def run(payload: dict) -> dict:
     enabled_only = payload.get("enabled_only", True)
-    return RewardService().list_rewards(enabled_only=enabled_only)
+    result = RewardService().list_rewards(enabled_only=enabled_only)
+    if payload.get("render", False):
+        result["message"] = render_reward_list(result)
+    return result
 
 
 if __name__ == "__main__":

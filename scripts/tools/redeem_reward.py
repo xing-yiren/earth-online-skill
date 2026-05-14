@@ -13,6 +13,7 @@ from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.points_service import PointsService
 from scripts.core.reward_service import RewardService
+from scripts.renderers import render_reward_preview, render_reward_redeemed
 
 
 def run(payload: dict) -> dict:
@@ -24,17 +25,22 @@ def run(payload: dict) -> dict:
         reward_id=payload.get("reward_id"),
     )
     if not lookup.get("success"):
+        if payload.get("render", False):
+            lookup["message"] = render_reward_preview(lookup)
         return lookup
 
     reward = lookup["reward"]
     if not payload.get("confirm", False):
         stats = points_service.get_stats()
-        return {
+        result = {
             "success": False,
             "error": "confirmation_required",
             "reward": reward,
             "current_points": stats["available_points"],
         }
+        if payload.get("render", False):
+            result["message"] = render_reward_preview(result)
+        return result
 
     deduct_result = points_service.deduct_points(
         amount=reward["cost"],
@@ -43,6 +49,8 @@ def run(payload: dict) -> dict:
         source_id=reward["id"],
     )
     if not deduct_result.get("success"):
+        if payload.get("render", False):
+            deduct_result["message"] = render_reward_preview(deduct_result)
         return deduct_result
 
     current_points = deduct_result["stats"]["available_points"]
@@ -52,7 +60,7 @@ def run(payload: dict) -> dict:
         redeemed_at=payload.get("redeemed_at"),
     )
     if not record_result.get("success"):
-        return {
+        result = {
             "success": False,
             "error": "reward_record_failed",
             "message": "Points deducted, but reward redemption record failed.",
@@ -60,14 +68,20 @@ def run(payload: dict) -> dict:
             "points": deduct_result,
             "details": record_result,
         }
+        if payload.get("render", False):
+            result["message"] = render_reward_preview(result)
+        return result
 
-    return {
+    result = {
         "success": True,
         "reward": reward,
         "points_transaction": deduct_result["transaction"],
         "redemption": record_result["redemption"],
         "points_stats": deduct_result["stats"],
     }
+    if payload.get("render", False):
+        result["message"] = render_reward_redeemed(result)
+    return result
 
 
 if __name__ == "__main__":

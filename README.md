@@ -4,23 +4,25 @@
 
 ## 简介
 
-地球Online 是一个面向 claw 类宿主平台的 Skill 核心原型。
+地球Online 当前优先按 **Claude Code 原生 Skill** 开发和验证，先打磨真实对话体验，再沉淀跨宿主 adapter。
 
 它的目标不是替代宿主平台的 Agent、Memory 或 Session 系统，而是在宿主之上提供一层游戏化生活体验，把用户的日常推进组织成一套可持续运转的任务与反馈循环。
 
 当前仓库定位为 **prototype**：
 
 - 已完成最小核心闭环
+- 已加入 Claude Code 对话渲染层
 - 已定义宿主接入协议与 adapter 方向
-- 尚未包含正式宿主 adapter 实现
+- jiuwenclaw / openclaw 等 adapter 暂作为后续集成验证方向
 
 ## 当前已实现
 
 - 晨间签到与早起 streak
-- 创建任务与完成任务
+- 创建任务、完成任务、查看任务、修改任务、取消任务
 - 积分、等级、成就、奖励
 - 早安播报数据聚合
 - 每日结算数据聚合
+- Claude Code 对话渲染层
 - 最小集成 smoke test
 
 ## 项目结构
@@ -47,6 +49,7 @@ earth-online-skill/
 ├── adapters/                         # 宿主 adapter 层
 ├── scripts/
 │   ├── core/                         # 核心服务层
+│   ├── renderers/                    # Claude Code 对话渲染层
 │   ├── tools/                        # 工具入口层
 │   └── smoke_test.py                 # 最小集成测试
 └── .gitignore
@@ -68,22 +71,26 @@ earth-online-skill/
 运行最小集成测试：
 
 ```bash
-python scripts/smoke_test.py
+PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 ```
 
 该脚本会在临时数据副本上验证：
 
 - 晨间签到
 - 创建任务
+- 查看 / 修改 / 取消任务
 - 完成任务
 - 晨报
 - 每日结算
 - 奖励列表
 - 奖励兑换
+- 自然语言 message 渲染
 
 ## 文档入口
 
 - [Skill 主规范](SKILL.md)
+- [Claude Code 使用说明](docs/claude-code-usage.md)
+- [Claude Code 对话测试脚本](docs/testing/claude-code-dialogue-test-prompts.md)
 - [V1 PRD](docs/product/v1-prd.md)
 - [Host Context 协议](docs/specs/host-context-spec.md)
 - [Host Adapter 规范](docs/specs/host-adapter-spec.md)
@@ -98,10 +105,11 @@ python scripts/smoke_test.py
 
 下一阶段会优先围绕两个方向推进：
 
-- 完善 `runtime/` 相关能力
-  - 明确初始化流程
-  - 实现 init / onboarding 工具
-  - 让示例种子数据与真实运行态彻底分离
+- 完善 Claude Code 原生体验
+  - 用真实对话测试持续打磨 `render=true` 输出
+  - 增强任务识别后的确认、修正和失败恢复体验
+  - 补充更多工具级测试
 
-- 实现宿主接入层
-  - 补各平台 adapter 示例
+- 稳定后再推进宿主接入层
+  - 保持 adapter 只负责输出统一 `host_context`
+  - 补 jiuwenclaw / openclaw 等平台的应用测试

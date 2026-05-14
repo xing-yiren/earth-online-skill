@@ -10,10 +10,17 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.settlement_service import SettlementService
+from scripts.renderers import render_daily_settlement
 
 
 def run(payload: dict) -> dict:
-    return SettlementService().get_daily_settlement(payload)
+    result = SettlementService().get_daily_settlement(payload)
+    player_name = payload.get("player_name")
+    if not player_name:
+        player_name = payload.get("host_context", {}).get("user", {}).get("name")
+    if payload.get("render", False):
+        result["message"] = render_daily_settlement(result, player_name=player_name)
+    return result
 
 
 if __name__ == "__main__":

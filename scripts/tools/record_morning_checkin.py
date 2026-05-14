@@ -15,6 +15,7 @@ from scripts.tools._bootstrap import load_payload_from_argv, print_result
 from scripts.core.achievement_service import AchievementService
 from scripts.core.config import USER_FILE
 from scripts.core.points_service import PointsService
+from scripts.renderers import render_morning_checkin
 
 
 def run(payload: dict) -> dict:
@@ -32,6 +33,8 @@ def run(payload: dict) -> dict:
 
     achievement_result = AchievementService().record_morning_checkin(normalized_payload)
     if not achievement_result.get("success"):
+        if payload.get("render", False):
+            achievement_result["message"] = render_morning_checkin(achievement_result)
         return achievement_result
 
     reward_transactions = []
@@ -49,6 +52,8 @@ def run(payload: dict) -> dict:
     result = dict(achievement_result)
     result["achievement_reward_transactions"] = reward_transactions
     result["points_stats"] = points_service.get_stats()
+    if payload.get("render", False):
+        result["message"] = render_morning_checkin(result)
     return result
 
 

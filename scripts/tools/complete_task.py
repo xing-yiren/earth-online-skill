@@ -18,6 +18,7 @@ from scripts.tools._bootstrap import load_payload_from_argv, print_result
 from scripts.core.achievement_service import AchievementService
 from scripts.core.points_service import PointsService
 from scripts.core.task_service import TaskService
+from scripts.renderers import render_task_completed
 
 
 def run(payload: dict) -> dict:
@@ -29,6 +30,8 @@ def run(payload: dict) -> dict:
 
     task_result = task_service.complete_task(payload)
     if not task_result.get("success"):
+        if payload.get("render", False):
+            task_result["message"] = render_task_completed(task_result)
         return task_result
 
     task = task_result["task"]
@@ -41,7 +44,7 @@ def run(payload: dict) -> dict:
         source_id=task["id"],
     )
     if not points_result.get("success"):
-        return {
+        result = {
             "success": False,
             "error": "points_update_failed",
             "message": "Task completed, but points update failed.",
@@ -49,12 +52,15 @@ def run(payload: dict) -> dict:
             "completion_log": completion_log,
             "details": points_result,
         }
+        if payload.get("render", False):
+            result["message"] = render_task_completed(result)
+        return result
 
     achievement_result = achievement_service.record_task_completion(
         {"date": completion_log["completed_date"]}
     )
     if not achievement_result.get("success"):
-        return {
+        result = {
             "success": False,
             "error": "achievement_update_failed",
             "message": "Task completed and points updated, but achievement update failed.",
@@ -63,6 +69,9 @@ def run(payload: dict) -> dict:
             "points": points_result,
             "details": achievement_result,
         }
+        if payload.get("render", False):
+            result["message"] = render_task_completed(result)
+        return result
 
     reward_transactions = []
     for achievement in achievement_result.get("unlocked", []):
@@ -77,7 +86,7 @@ def run(payload: dict) -> dict:
 
     final_stats = points_service.get_stats()
 
-    return {
+    result = {
         "success": True,
         "task": task,
         "completion_log": completion_log,
@@ -86,6 +95,9 @@ def run(payload: dict) -> dict:
         "achievement_reward_transactions": reward_transactions,
         "points_stats": final_stats,
     }
+    if payload.get("render", False):
+        result["message"] = render_task_completed(result)
+    return result
 
 
 if __name__ == "__main__":

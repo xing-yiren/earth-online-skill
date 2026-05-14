@@ -10,10 +10,14 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.settlement_service import SettlementService
+from scripts.renderers import render_morning_brief
 
 
 def run(payload: dict) -> dict:
-    return SettlementService().get_morning_brief(payload)
+    result = SettlementService().get_morning_brief(payload)
+    if payload.get("render", False):
+        result["message"] = render_morning_brief(result)
+    return result
 
 
 if __name__ == "__main__":
