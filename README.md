@@ -78,6 +78,7 @@ PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 
 ```bash
 PYTHONIOENCODING=utf-8 python scripts/dialogue_edge_smoke_test.py
+PYTHONIOENCODING=utf-8 python scripts/onboarding_smoke_test.py
 PYTHONIOENCODING=utf-8 python scripts/cli_smoke_test.py
 ```
 
@@ -89,6 +90,7 @@ PYTHONIOENCODING=utf-8 python scripts/adapter_smoke_test.py
 
 这些脚本会在临时数据副本上验证：
 
+- 首次初始化 / onboarding
 - 晨间签到
 - 创建任务
 - 查看 / 修改 / 取消任务

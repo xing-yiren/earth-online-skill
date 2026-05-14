@@ -44,6 +44,28 @@ EARTH_ONLINE_DATA_ROOT=/tmp/earth-online-data PYTHONIOENCODING=utf-8 python scri
 
 ## 核心对话与工具映射
 
+### 首次初始化 / 玩家档案
+
+用户：
+
+```text
+帮我初始化地球 Online
+```
+
+推荐流程：
+
+```bash
+python scripts/tools/init_skill_profile.py '{"render":true}'
+```
+
+如果返回 `next_action=ask_required_fields`，按 `recommended_questions` 询问用户。用户明确确认必填字段后：
+
+```bash
+python scripts/tools/apply_init_config.py '{"confirmed_by_user":true,"confirmed_fields":["name","timezone"],"required_fields":["name","timezone"],"name":"DemoUser","timezone":"Asia/Shanghai","render":true}'
+```
+
+不要用默认值跳过确认。
+
 ### 早安 / 今日副本
 
 用户：
@@ -207,6 +229,7 @@ PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 
 ```bash
 PYTHONIOENCODING=utf-8 python scripts/dialogue_edge_smoke_test.py
+PYTHONIOENCODING=utf-8 python scripts/onboarding_smoke_test.py
 ```
 
 CLI 工具入口：

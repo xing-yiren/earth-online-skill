@@ -59,6 +59,15 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 
 ## 常见意图与工具映射
 
+### 首次初始化 / 玩家档案
+
+首次使用或用户要求配置地球 Online 时：
+
+1. 调用 `init_skill_profile`，传入 `render=true`。
+2. 如果返回 `ask_required_fields`，按 `recommended_questions` 询问用户。
+3. 用户明确确认必填字段后，调用 `apply_init_config`，传入 `confirmed_by_user=true`、`confirmed_fields=[...]` 和 `render=true`。
+4. 不得直接用默认值跳过用户确认。
+
 ### 早安 / 开启今日副本
 
 推荐流程：

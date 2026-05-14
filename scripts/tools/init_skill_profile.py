@@ -10,10 +10,14 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.tools._bootstrap import load_payload_from_argv, print_result
 
 from scripts.core.init_service import InitService
+from scripts.renderers import render_init_profile
 
 
 def run(payload: dict) -> dict:
-    return InitService().init_skill_profile(payload)
+    result = InitService().init_skill_profile(payload)
+    if payload.get("render", False):
+        result["message"] = render_init_profile(result)
+    return result
 
 
 if __name__ == "__main__":
