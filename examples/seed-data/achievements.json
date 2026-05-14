@@ -2,6 +2,7 @@
   "version": "1.0",
   "stats": {
     "survival_days": 0,
+    "active_dates": [],
     "early_bird_streak": 0,
     "best_early_bird_streak": 0,
     "last_early_bird_date": null,

@@ -29,9 +29,21 @@ from scripts.tools.complete_task import run as complete_task
 from scripts.tools.create_task import run as create_task
 from scripts.tools.get_daily_settlement import run as get_daily_settlement
 from scripts.tools.get_morning_brief import run as get_morning_brief
+from scripts.tools.list_active_tasks import run as list_active_tasks
 from scripts.tools.list_rewards import run as list_rewards
 from scripts.tools.record_morning_checkin import run as record_morning_checkin
 from scripts.tools.redeem_reward import run as redeem_reward
+from scripts.tools.update_task import run as update_task
+from scripts.tools.cancel_task import run as cancel_task
+from scripts.renderers import (
+    render_daily_settlement,
+    render_morning_brief,
+    render_morning_checkin,
+    render_reward_list,
+    render_reward_preview,
+    render_task_completed,
+    render_task_created,
+)
 
 
 def main() -> None:
@@ -64,8 +76,37 @@ def main() -> None:
             }
         ),
         "list_rewards": list_rewards({"enabled_only": True}),
+        "list_active_tasks": None,
+        "update_task": None,
+        "cancel_task": None,
         "redeem_preview": redeem_reward({"reward_query": "看电影", "confirm": False}),
     }
+
+    results["list_active_tasks"] = list_active_tasks({"render": True})
+    results["update_task"] = update_task(
+        {
+            "task_query": "周会纪要",
+            "deadline": "2026-03-25",
+            "render": True,
+            "now": "2026-03-25T10:00:00+08:00",
+        }
+    )
+
+    scratch_task = create_task(
+        {
+            "name": "临时测试任务",
+            "type": "side",
+            "source": "smoke_test",
+            "now": "2026-03-25T11:00:00+08:00",
+        }
+    )
+    results["cancel_task"] = cancel_task(
+        {
+            "task_id": scratch_task.get("task", {}).get("id"),
+            "render": True,
+            "now": "2026-03-25T11:05:00+08:00",
+        }
+    )
 
     created_task_name = (
         results["create_task"].get("task", {}).get("name", "整理周会纪要")
@@ -86,6 +127,22 @@ def main() -> None:
         }
     )
 
+    rendered = {
+        "morning_checkin": render_morning_checkin(results["morning_checkin"]),
+        "create_task": render_task_created(results["create_task"]),
+        "morning_brief": render_morning_brief(results["morning_brief"]),
+        "list_rewards": render_reward_list(results["list_rewards"]),
+        "redeem_preview": render_reward_preview(results["redeem_preview"]),
+        "list_active_tasks": results["list_active_tasks"].get("message"),
+        "update_task": results["update_task"].get("message"),
+        "cancel_task": results["cancel_task"].get("message"),
+        "complete_task": render_task_completed(results["complete_task"]),
+        "daily_settlement": render_daily_settlement(
+            results["daily_settlement"], player_name="DemoUser"
+        ),
+        "redeem_confirm": render_reward_preview(results["redeem_confirm"]),
+    }
+
     final_snapshot = {
         "tasks": json.loads(files["tasks"].read_text(encoding="utf-8")),
         "points": json.loads(files["points"].read_text(encoding="utf-8")),
@@ -97,6 +154,7 @@ def main() -> None:
         json.dumps(
             {
                 "results": results,
+                "rendered": rendered,
                 "summary": {
                     "task_count": len(final_snapshot["tasks"]["tasks"]),
                     "completion_log_count": len(

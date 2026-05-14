@@ -183,6 +183,121 @@ class TaskService:
         tasks = [task for task in data["tasks"] if task.get("status") == "active"]
         return [self._public_task_view(task) for task in tasks]
 
+    def update_task(self, payload: dict) -> dict:
+        """Update an active task by id or fuzzy query."""
+
+        data = self._load_data()
+        matches = self._match_tasks(
+            data["tasks"],
+            task_id=payload.get("task_id"),
+            task_query=(payload.get("task_query") or "").strip(),
+        )
+        if not matches:
+            return {
+                "success": False,
+                "error": "task_not_found",
+                "message": "No matching active task found.",
+            }
+        if len(matches) > 1:
+            return {
+                "success": False,
+                "error": "needs_confirmation",
+                "candidates": [self._public_task_view(task) for task in matches],
+            }
+
+        task = matches[0]
+        changed_fields = []
+
+        if "name" in payload:
+            name = (payload.get("name") or "").strip()
+            if not name:
+                return {
+                    "success": False,
+                    "error": "invalid_task_name",
+                    "message": "Task name is required.",
+                }
+            task["name"] = name
+            changed_fields.append("name")
+
+        if "type" in payload:
+            task_type = payload.get("type")
+            if task_type not in {"main", "side"}:
+                return {
+                    "success": False,
+                    "error": "invalid_task_type",
+                    "message": "Task type must be 'main' or 'side'.",
+                }
+            task["type"] = task_type
+            changed_fields.append("type")
+
+        if "recurrence" in payload:
+            recurrence = payload.get("recurrence")
+            if recurrence not in {"once", "daily"}:
+                return {
+                    "success": False,
+                    "error": "invalid_recurrence",
+                    "message": "Task recurrence must be 'once' or 'daily'.",
+                }
+            task["recurrence"] = recurrence
+            changed_fields.append("recurrence")
+
+        if "points" in payload:
+            task["points"] = int(payload.get("points", 0))
+            changed_fields.append("points")
+
+        if "deadline" in payload:
+            task["deadline"] = payload.get("deadline")
+            changed_fields.append("deadline")
+
+        if not changed_fields:
+            return {
+                "success": False,
+                "error": "no_fields_to_update",
+                "message": "No supported fields were provided for update.",
+            }
+
+        task["updated_at"] = self._now_iso(payload.get("now"))
+        self._save_data(data)
+
+        return {
+            "success": True,
+            "task": self._public_task_view(task),
+            "changed_fields": changed_fields,
+        }
+
+    def cancel_task(self, payload: dict) -> dict:
+        """Cancel an active task by id or fuzzy query."""
+
+        data = self._load_data()
+        matches = self._match_tasks(
+            data["tasks"],
+            task_id=payload.get("task_id"),
+            task_query=(payload.get("task_query") or "").strip(),
+        )
+        if not matches:
+            return {
+                "success": False,
+                "error": "task_not_found",
+                "message": "No matching active task found.",
+            }
+        if len(matches) > 1:
+            return {
+                "success": False,
+                "error": "needs_confirmation",
+                "candidates": [self._public_task_view(task) for task in matches],
+            }
+
+        task = matches[0]
+        now_iso = self._now_iso(payload.get("now"))
+        task["status"] = "cancelled"
+        task["updated_at"] = now_iso
+        self._save_data(data)
+
+        return {
+            "success": True,
+            "task": self._public_task_view(task),
+        }
+
     def _load_data(self) -> dict:
         if self.data_file.exists():
             with open(self.data_file, "r", encoding="utf-8") as file:
@@ -216,7 +331,11 @@ class TaskService:
     ) -> list[dict]:
         if task_id:
             for task in tasks:
-                if task.get("id") == task_id and not self._is_completed_once(task):
+                if (
+                    task.get("id") == task_id
+                    and task.get("status") == "active"
+                    and not self._is_completed_once(task)
+                ):
                     return [task]
             return []
 
@@ -227,7 +346,7 @@ class TaskService:
         candidates = []
         for task in tasks:
             name = self._normalize(task.get("name", ""))
-            if self._is_completed_once(task):
+            if task.get("status") != "active" or self._is_completed_once(task):
                 continue
             if normalized_query in name or name in normalized_query:
                 candidates.append(task)

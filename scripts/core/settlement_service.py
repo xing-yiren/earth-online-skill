@@ -70,8 +70,16 @@ class SettlementService:
         ]
         main_completed = sum(1 for item in completed_logs if item.get("type") == "main")
         side_completed = sum(1 for item in completed_logs if item.get("type") == "side")
-        main_total = sum(1 for item in tasks["tasks"] if item.get("type") == "main")
-        side_total = sum(1 for item in tasks["tasks"] if item.get("type") == "side")
+        main_total = sum(
+            1
+            for item in tasks["tasks"]
+            if item.get("type") == "main" and item.get("status") != "cancelled"
+        )
+        side_total = sum(
+            1
+            for item in tasks["tasks"]
+            if item.get("type") == "side" and item.get("status") == "active"
+        )
         points_earned_today = sum(item.get("points", 0) for item in completed_logs)
 
         completed_tasks = [
@@ -87,7 +95,11 @@ class SettlementService:
         for task in tasks["tasks"]:
             if task.get("type") == "main" and task.get("status") == "active":
                 pending_tasks.append({"name": task.get("name"), "type": "main"})
-            elif task.get("type") == "side" and task.get("last_completed_date") != date:
+            elif (
+                task.get("type") == "side"
+                and task.get("status") == "active"
+                and task.get("last_completed_date") != date
+            ):
                 pending_tasks.append({"name": task.get("name"), "type": "side"})
 
         new_achievements = [
@@ -159,6 +171,7 @@ class SettlementService:
                 "version": "1.0",
                 "stats": {
                     "survival_days": 0,
+                    "active_dates": [],
                     "early_bird_streak": 0,
                     "best_early_bird_streak": 0,
                     "tasks_completed_total": 0,

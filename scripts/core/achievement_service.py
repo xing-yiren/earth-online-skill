@@ -105,7 +105,7 @@ class AchievementService:
 
         stats["tasks_completed_total"] += 1
         if payload.get("date"):
-            stats["last_active_date"] = payload["date"]
+            self._record_active_date(stats, payload["date"])
 
         self._save_data(data)
         unlocked = self.check_new_achievements()
@@ -138,7 +138,7 @@ class AchievementService:
             grace_minutes=grace_minutes,
         )
 
-        stats["last_active_date"] = current_date
+        self._record_active_date(stats, current_date)
         unlocked = []
 
         if is_early:
@@ -226,6 +226,7 @@ class AchievementService:
             "version": "1.0",
             "stats": {
                 "survival_days": 0,
+                "active_dates": [],
                 "early_bird_streak": 0,
                 "best_early_bird_streak": 0,
                 "last_early_bird_date": None,
@@ -234,6 +235,14 @@ class AchievementService:
             },
             "unlocked": [],
         }
+
+    def _record_active_date(self, stats: dict, date: str) -> None:
+        active_dates = stats.setdefault("active_dates", [])
+        if date not in active_dates:
+            active_dates.append(date)
+            active_dates.sort()
+        stats["survival_days"] = len(active_dates)
+        stats["last_active_date"] = date
 
     def _save_data(self, data: dict) -> None:
         with open(self.data_file, "w", encoding="utf-8") as file:
