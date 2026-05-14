@@ -39,7 +39,7 @@ examples/seed-data/
 临时测试时可使用环境变量：
 
 ```bash
-EARTH_ONLINE_DATA_ROOT=/tmp/earth-online-data python scripts/smoke_test.py
+EARTH_ONLINE_DATA_ROOT=/tmp/earth-online-data PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 ```
 
 ## 核心对话与工具映射
@@ -201,6 +201,18 @@ python scripts/tools/redeem_reward.py '{"reward_query":"看电影","confirm":tru
 
 ```bash
 PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
+```
+
+真实对话边界：
+
+```bash
+PYTHONIOENCODING=utf-8 python scripts/dialogue_edge_smoke_test.py
+```
+
+CLI 工具入口：
+
+```bash
+PYTHONIOENCODING=utf-8 python scripts/cli_smoke_test.py
 ```
 
 adapter 原型：

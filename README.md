@@ -68,13 +68,26 @@ earth-online-skill/
 
 ## 快速验证
 
-运行最小集成测试：
+运行核心集成测试：
 
 ```bash
 PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 ```
 
-该脚本会在临时数据副本上验证：
+补充验证 Claude Code 对话边界和 CLI 工具入口：
+
+```bash
+PYTHONIOENCODING=utf-8 python scripts/dialogue_edge_smoke_test.py
+PYTHONIOENCODING=utf-8 python scripts/cli_smoke_test.py
+```
+
+adapter 原型验证：
+
+```bash
+PYTHONIOENCODING=utf-8 python scripts/adapter_smoke_test.py
+```
+
+这些脚本会在临时数据副本上验证：
 
 - 晨间签到
 - 创建任务
@@ -85,6 +98,8 @@ PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 - 奖励列表
 - 奖励兑换
 - 自然语言 message 渲染
+- CLI JSON 入参工具调用
+- 重复、歧义、幂等、取消等对话边界
 
 ## 文档入口
 
