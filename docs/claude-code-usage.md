@@ -2,45 +2,44 @@
 
 > 地球 Online 当前优先按 Claude Code 原生 Skill 使用和验证。jiuwenclaw / openclaw adapter 保留为后续宿主集成方向。
 
-## 使用目标
+## Skill 安装位置
 
-在 Claude Code 对话中直接体验完整闭环：
-
-```text
-早安 / 今日副本
-  ↓
-记录今天要做的事
-  ↓
-完成任务并获得积分
-  ↓
-查看剩余任务
-  ↓
-晚间结算
-  ↓
-查看 / 兑换奖励
-```
-
-## 运行态数据
-
-默认运行态目录：
+Claude Code 项目级 skill 需要放在：
 
 ```text
-runtime/data/
+.claude/skills/earth-online-skill/SKILL.md
 ```
 
-首次调用工具时，会从：
+当前仓库已经按这个路径安装，仓库根目录的 `SKILL.md` 仅保留为文档说明，不作为 Claude Code 自动识别入口。
+
+如果当前会话是在安装 skill 之前启动的，通常需要重新进入仓库或重启 Claude Code，会话里的 skill 列表才会刷新。
+
+## Skill 触发验证
+
+安装到项目级 skill 目录后，建议重新进入当前仓库的 Claude Code 会话，再测试以下输入：
 
 ```text
-examples/seed-data/
+帮我初始化地球 Online
+早安
+我今天要整理项目计划
+以后每天阅读30分钟
+我现在还有什么任务
+项目计划整理完了
+今天结算一下
+有什么奖励可以兑换
+我想兑换周末看电影
 ```
 
-复制初始数据。
+重点观察：
 
-临时测试时可使用环境变量：
+- 是否能命中 `earth-online-skill`
+- 是否优先调用 `scripts/tools/*`
+- 是否优先使用工具返回的 `message`
+- 遇到歧义或确认场景时是否先问用户
 
-```bash
-EARTH_ONLINE_DATA_ROOT=/tmp/earth-online-data PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
-```
+如果当前会话是在安装 `.claude/skills/earth-online-skill/SKILL.md` 之前启动的，skill 列表通常不会自动刷新，需要重新进入仓库或重启 Claude Code。
+
+
 
 ## 核心对话与工具映射
 

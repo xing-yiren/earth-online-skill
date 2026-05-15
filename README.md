@@ -30,7 +30,11 @@
 ```text
 earth-online-skill/
 ├── README.md                         # 仓库说明与使用入口
-├── SKILL.md                          # Skill 主规范
+├── SKILL.md                          # Skill 主规范（文档）
+├── .claude/
+│   └── skills/
+│       └── earth-online-skill/
+│           └── SKILL.md              # Claude Code 项目级 skill 入口
 ├── docs/
 │   ├── product/
 │   │   └── v1-prd.md                 # V1 产品定义
@@ -74,7 +78,7 @@ earth-online-skill/
 PYTHONIOENCODING=utf-8 python scripts/smoke_test.py
 ```
 
-补充验证 Claude Code 对话边界和 CLI 工具入口：
+补充验证 Claude Code 对话边界、onboarding 和 CLI 工具入口：
 
 ```bash
 PYTHONIOENCODING=utf-8 python scripts/dialogue_edge_smoke_test.py
