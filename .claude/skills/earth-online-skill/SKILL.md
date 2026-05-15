@@ -23,9 +23,16 @@ description: >
 
 ## 工作方式
 
-优先调用 `scripts/tools/*.py`，并传入 `render=true`。
+调用工具时使用以下任一格式：
 
-如果工具结果包含 `message`，优先直接使用 `message` 回复用户。
+```bash
+python scripts/tools/<tool>.py '{"render":true}'
+python scripts/tools/<tool>.py render=true
+```
+
+优先用 JSON 参数；如果只传简单参数，`key=value` 也可用。
+
+工具结果包含 `message` 时，只回复一次 `message` 的内容，不要重复改写、不要重复粘贴、不要同时输出 JSON。
 
 如果工具返回以下状态，不要猜测，先向用户确认：
 
@@ -37,10 +44,11 @@ description: >
 
 ### 首次初始化
 
-1. 调用 `init_skill_profile`。
-2. 如果返回 `next_action=ask_required_fields`，按 `recommended_questions` 询问用户。
-3. 用户明确确认后，再调用 `apply_init_config`。
-4. 不要用默认值跳过确认。
+1. 调用 `init_skill_profile render=true`。
+2. 如果返回 `next_action=ask_required_fields`，只向用户提出需要确认的问题。
+3. 如果返回 `initialized=true`，直接回复工具 `message`，不要重复输出。
+4. 用户明确确认后，再调用 `apply_init_config`。
+5. 不要用默认值跳过确认。
 
 ### 早安 / 今日副本
 
@@ -77,6 +85,7 @@ description: >
 
 ## 规则
 
+- 最终回复保持简短：除非用户要求解释，否则直接返回工具 `message`。
 - 不直接编辑 `runtime/data/*.json`，正常状态变更必须走工具入口。
 - `core` 负责事实和状态，`renderer` 负责自然语言表达。
 - 当前优先验证 Claude Code 对话体验；jiuwenclaw / openclaw adapter 是后续集成方向。

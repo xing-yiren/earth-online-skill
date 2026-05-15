@@ -17,7 +17,32 @@ def ensure_project_root_on_path() -> Path:
 def load_payload_from_argv() -> dict:
     if len(sys.argv) < 2:
         return {}
-    return json.loads(sys.argv[1])
+
+    first = sys.argv[1]
+    if first.strip().startswith("{"):
+        return json.loads(first)
+
+    payload = {}
+    for item in sys.argv[1:]:
+        if "=" not in item:
+            continue
+        key, value = item.split("=", 1)
+        payload[key] = _parse_scalar(value)
+    return payload
+
+
+def _parse_scalar(value: str):
+    lowered = value.strip().lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered in {"null", "none"}:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return value
 
 
 def print_result(result: dict) -> None:
