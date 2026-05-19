@@ -25,6 +25,7 @@ def render_init_profile(result: dict) -> str:
             lines.append(f"当前玩家称呼：{profile['name']}")
         if profile.get("timezone"):
             lines.append(f"当前时区：{profile['timezone']}")
+        lines.append("如果你愿意，我接下来也可以帮你从当前上下文整理一批可导入的候选任务。")
         return join_lines(lines)
 
     next_action = result.get("next_action")
@@ -96,7 +97,7 @@ def render_apply_init_config(result: dict) -> str:
             f"时区：{profile.get('timezone', 'Asia/Shanghai')}",
             f"表达风格：{profile.get('style', 'standard')}",
             f"晨间目标：{profile.get('morning_target_time', '07:00')} + {profile.get('early_bird_grace_minutes', 30)} 分钟宽限",
-            "现在可以开始今日副本了。",
+            "如果你愿意，我接下来可以继续帮你从当前上下文整理可导入的候选任务。",
         ]
     )
 

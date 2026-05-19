@@ -50,6 +50,16 @@ python scripts/tools/<tool>.py render=true
 4. 用户明确确认后，再调用 `apply_init_config`。
 5. 不要用默认值跳过确认。
 
+### 候选任务导入（可选）
+
+建档完成后，如果用户想快速导入一批初始任务：
+
+1. 由你从当前对话/记忆/计划中整理 `raw_candidates`（字符串或带字段的 dict）。
+2. 调用 `suggest_onboarding_imports render=true`，它只生成候选，不写任务。
+3. 把候选展示给用户，等待用户确认。
+4. 用户选好后，把对应条目放入 `selected_candidates`，调用 `apply_onboarding_imports render=true`。
+5. 不要跳过用户确认。
+
 ### 早安 / 今日副本
 
 1. 调用 `record_morning_checkin`

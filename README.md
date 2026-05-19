@@ -95,6 +95,7 @@ PYTHONIOENCODING=utf-8 python scripts/adapter_smoke_test.py
 这些脚本会在临时数据副本上验证：
 
 - 首次初始化 / onboarding
+- 候选任务导入（先生成候选，再用户确认导入）
 - 晨间签到
 - 创建任务
 - 查看 / 修改 / 取消任务

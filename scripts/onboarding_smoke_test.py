@@ -77,6 +77,31 @@ def main() -> None:
         env,
     )
     initialized_result = _run_tool("init_skill_profile.py", {"render": True}, env)
+    suggested_imports = _run_tool(
+        "suggest_onboarding_imports.py",
+        {
+            "raw_candidates": [
+                {"name": "每日复盘三件事", "type": "side", "points": 20, "source": "memory"},
+                {"name": "完成项目初始化验证", "type": "main", "points": 80, "source": "conversation"},
+                "整理长期目标清单",
+            ],
+            "render": True,
+        },
+        env,
+    )
+    tasks_state_after_suggest = json.loads((data_root / "tasks.json").read_text(encoding="utf-8"))
+    _assert(tasks_state_after_suggest["task_counter"] == 0, "suggestion stage must not write tasks")
+    _assert(tasks_state_after_suggest["tasks"] == [], "suggestion stage must not create tasks")
+
+    apply_imports = _run_tool(
+        "apply_onboarding_imports.py",
+        {
+            "selected_candidates": suggested_imports["candidates"][:2],
+            "now": "2026-03-25T09:30:00+08:00",
+            "render": True,
+        },
+        env,
+    )
 
     _assert(init_result["next_action"] == "ask_required_fields", "missing profile should ask required fields")
     _assert("message" in init_result, "init result should include message")
@@ -88,6 +113,16 @@ def main() -> None:
     _assert("message" in apply_success, "successful apply should include message")
     _assert(initialized_result["initialized"], "profile should be initialized after apply")
     _assert("message" in initialized_result, "initialized check should include message")
+    _assert(suggested_imports["success"], "candidate suggestion should succeed")
+    _assert(suggested_imports["count"] == 3, "should normalize three candidates")
+    _assert("message" in suggested_imports, "candidate suggestion should include message")
+
+    _assert(apply_imports["success"], "candidate import should succeed")
+    _assert(apply_imports["count"] == 2, "two confirmed candidates should be imported")
+    _assert("message" in apply_imports, "candidate import should include message")
+    tasks_state_after_apply = json.loads((data_root / "tasks.json").read_text(encoding="utf-8"))
+    imported_names = {task["name"] for task in tasks_state_after_apply["tasks"]}
+    _assert(imported_names == {"每日复盘三件事", "完成项目初始化验证"}, "imported task names should match selected candidates")
 
     print(
         json.dumps(
@@ -99,6 +134,8 @@ def main() -> None:
                     "unresolved_failure": unresolved_failure,
                     "apply_success": apply_success,
                     "initialized_result": initialized_result,
+                    "suggested_imports": suggested_imports,
+                    "apply_imports": apply_imports,
                 },
             },
             ensure_ascii=False,

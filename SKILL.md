@@ -68,6 +68,15 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 3. 用户明确确认必填字段后，调用 `apply_init_config`，传入 `confirmed_by_user=true`、`confirmed_fields=[...]` 和 `render=true`。
 4. 不得直接用默认值跳过用户确认。
 
+### 候选任务导入（可选）
+
+建档完成后，如果用户希望快速带入一批初始任务，可以走候选导入流程：
+
+1. 由 Claude 从当前对话/记忆/计划中整理出 `raw_candidates`（字符串或带字段的 dict），调用 `suggest_onboarding_imports`，传入 `render=true`。
+2. 工具只生成候选，不会写入任务；展示后让用户确认要导入哪些。
+3. 用户确认后，调用 `apply_onboarding_imports`，把用户选中的候选放在 `selected_candidates`，传入 `render=true`。
+4. 不要跳过用户确认直接导入。
+
 ### 早安 / 开启今日副本
 
 推荐流程：

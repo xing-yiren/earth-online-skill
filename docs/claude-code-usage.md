@@ -65,6 +65,26 @@ python scripts/tools/apply_init_config.py '{"confirmed_by_user":true,"confirmed_
 
 不要用默认值跳过确认。
 
+### 候选任务导入（可选）
+
+建档完成后，如果用户希望快速带入一批初始任务，可以走候选导入流程。
+
+先由 Claude 整理出候选文本（字符串列表或带字段的 dict），调用：
+
+```bash
+python scripts/tools/suggest_onboarding_imports.py '{"raw_candidates":["每日复盘三件事",{"name":"完成项目初始化验证","type":"main","points":80}],"render":true}'
+```
+
+工具只生成候选并展示给用户，不会写入任务。
+
+用户确认选中编号之后，把对应候选条目放入 `selected_candidates`，调用：
+
+```bash
+python scripts/tools/apply_onboarding_imports.py '{"selected_candidates":[{"id":"candidate_001","name":"每日复盘三件事","type":"side","recurrence":"daily","points":20}],"render":true}'
+```
+
+只有这一步会真正调用 `create_task` 写入。
+
 ### 早安 / 今日副本
 
 用户：
