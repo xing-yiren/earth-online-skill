@@ -46,4 +46,6 @@ def _parse_scalar(value: str):
 
 
 def print_result(result: dict) -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False, indent=2))
