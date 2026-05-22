@@ -20,16 +20,21 @@ def render_init_profile(result: dict) -> str:
 
     if result.get("initialized"):
         profile = result.get("suggested_profile", {}) or {}
-        name = profile.get("name", "玩家")
-        tz = profile.get("timezone", "---")
-        return join_lines([
+        name = profile.get("name") or "玩家"
+        tz = profile.get("timezone") or "---"
+        lines = [
             "▸ 地球 Online 系统已就绪",
             "",
             f"  当前登录玩家：{name}",
             f"  所在时区：{tz}",
-            "",
-            "系统自检完成，可以进入今日副本。",
-        ])
+        ]
+        if name == "玩家":
+            lines.append("")
+            lines.append("⚠ 系统检测到玩家称号仍为默认值，建议先更新称号。是否修改？")
+        else:
+            lines.append("")
+            lines.append("系统自检完成，可以进入今日副本。")
+        return join_lines(lines)
 
     next_action = result.get("next_action")
     required_fields = result.get("required_fields") or []
