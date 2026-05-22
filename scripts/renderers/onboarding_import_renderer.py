@@ -12,11 +12,15 @@ _SOURCE_LABEL = {
     "todo": "TODO",
     "plan": "计划",
     "manual": "手动输入",
+    "session_scan": "跨会话扫描",
 }
 
 
 def render_suggest_onboarding_imports(result: dict) -> str:
     if not result.get("success"):
+        error = result.get("error")
+        if error == "confirmation_required":
+            return result.get("message", "需要用户确认后才能继续。")
         return _render_failure(result, default="候选任务生成失败。")
 
     candidates = result.get("candidates") or []

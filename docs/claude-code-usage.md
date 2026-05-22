@@ -245,6 +245,36 @@ python scripts/tools/redeem_reward.py '{"reward_query":"看电影","render":true
 python scripts/tools/redeem_reward.py '{"reward_query":"看电影","confirm":true,"render":true}'
 ```
 
+### 跨会话任务扫描
+
+用户：
+
+```text
+/earth-online-skill scan
+```
+
+或：
+
+```text
+帮我扫描所有会话里的任务
+```
+
+必须先获得用户明确许可。流程：
+
+1. 第一次调用不带 `confirmed_by_user`，工具返回确认提示：
+
+```bash
+python scripts/tools/scan_sessions.py '{"render":true}'
+```
+
+2. 用户确认后，传入 `confirmed_by_user=true`：
+
+```bash
+python scripts/tools/scan_sessions.py '{"confirmed_by_user":true,"render":true}'
+```
+
+3. 展示候选，用户确认后通过 `apply_onboarding_imports` 导入。
+
 ## Claude Code 回复规则
 
 - 工具返回 `message` 时，优先使用 `message` 回复用户。

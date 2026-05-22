@@ -34,8 +34,24 @@ description: >
 | `create` / `创建` | 询问任务名称和类型后调用 `create_task` |
 | `settle` / `结算` | `get_daily_settlement` |
 | `rewards` / `奖励` | `list_rewards` |
+| `scan` / `扫描` | 跨会话任务扫描（见下方） |
 
 如果子命令不在上述列表中，按自然语言意图正常处理。
+
+## 跨会话任务扫描
+
+用户可以用 `scan` 命令或说"扫描所有会话"来触发。
+
+**关键约束：必须先获得用户明确许可才能扫描。** 会话记录是敏感数据。
+
+流程：
+
+1. 调用 `scan_sessions render=true`（不带 `confirmed_by_user`）。
+2. 工具会返回 `confirmation_required`，展示确认提示。
+3. 用户明确说"确认"后，调用 `scan_sessions`，传入 `confirmed_by_user=true` 和 `render=true`。
+4. 工具返回候选列表后，展示给用户确认。
+5. 用户选好后，用 `apply_onboarding_imports` 导入。
+6. 整个过程不要跳过任何确认步骤。
 
 ## 工作方式
 

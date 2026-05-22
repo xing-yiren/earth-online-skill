@@ -59,8 +59,19 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 | `create` / `创建` | 创建新任务 |
 | `settle` / `结算` | 每日结算 |
 | `rewards` / `奖励` | 查看可兑换奖励 |
+| `scan` / `扫描` | 跨会话任务扫描 |
 
 如果子命令不在列表中，按自然语言意图正常处理。
+
+### 跨会话任务扫描
+
+用户可以用 `scan` 命令或说"扫描所有会话"来触发。
+
+必须先获得用户明确许可才能扫描会话记录。流程：
+
+1. 调用 `scan_sessions render=true`（不带 confirm），工具返回确认提示。
+2. 用户明确说"确认"后，调用 `scan_sessions confirmed_by_user=true render=true`。
+3. 展示候选列表，用户确认后通过 `apply_onboarding_imports` 导入。
 
 ## Claude Code 使用规则
 
