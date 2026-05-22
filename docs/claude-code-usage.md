@@ -18,6 +18,8 @@ Claude Code 项目级 skill 需要放在：
 
 安装到项目级 skill 目录后，建议重新进入当前仓库的 Claude Code 会话，再测试以下输入：
 
+**自然语言：**
+
 ```text
 帮我初始化地球 Online
 早安
@@ -30,12 +32,25 @@ Claude Code 项目级 skill 需要放在：
 我想兑换周末看电影
 ```
 
+**命令行模式：**
+
+```text
+/earth-online-skill init
+/earth-online-skill checkin
+/earth-online-skill tasks
+/earth-online-skill settle
+/earth-online-skill rewards
+地球online 任务
+地球online 结算
+```
+
 重点观察：
 
 - 是否能命中 `earth-online-skill`
 - 是否优先调用 `scripts/tools/*`
 - 是否优先使用工具返回的 `message`
 - 遇到歧义或确认场景时是否先问用户
+- 命令行模式是否能正确路由到对应工具
 
 如果当前会话是在安装 `.claude/skills/earth-online-skill/SKILL.md` 之前启动的，skill 列表通常不会自动刷新，需要重新进入仓库或重启 Claude Code。
 

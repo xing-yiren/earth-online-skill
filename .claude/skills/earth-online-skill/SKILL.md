@@ -20,6 +20,22 @@ description: >
 - 今天结算、今天做了什么
 - 有什么奖励、我想兑换某个奖励
 - 帮我初始化地球 Online
+- `/earth-online-skill` 或 `地球online` 后跟子命令（见下方命令行模式）
+
+## 命令行模式
+
+用户可以用 `/earth-online-skill <command>` 或 `地球online <command>` 直接操作：
+
+| 命令 | 映射工具 |
+|------|---------|
+| `init` | `init_skill_profile`，然后按首次初始化流程推进 |
+| `checkin` / `早安` / `签到` | `record_morning_checkin` + `get_morning_brief` |
+| `tasks` / `任务` | `list_active_tasks` |
+| `create` / `创建` | 询问任务名称和类型后调用 `create_task` |
+| `settle` / `结算` | `get_daily_settlement` |
+| `rewards` / `奖励` | `list_rewards` |
+
+如果子命令不在上述列表中，按自然语言意图正常处理。
 
 ## 工作方式
 

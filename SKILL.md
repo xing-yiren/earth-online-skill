@@ -45,6 +45,22 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 - 改一下任务、取消某个任务、刚才记错了
 - 今天结算、今天做了什么、每日结算
 - 有什么奖励、我想兑换某个奖励
+- `/earth-online-skill <command>` 或 `地球online <command>` 命令行模式
+
+### 命令行模式
+
+用户可以用 `/earth-online-skill <command>` 或 `地球online <command>` 直接操作：
+
+| 命令 | 行为 |
+|------|------|
+| `init` | 启动玩家建档流程 |
+| `checkin` / `早安` / `签到` | 晨间签到 + 今日播报 |
+| `tasks` / `任务` | 查看当前活跃任务 |
+| `create` / `创建` | 创建新任务 |
+| `settle` / `结算` | 每日结算 |
+| `rewards` / `奖励` | 查看可兑换奖励 |
+
+如果子命令不在列表中，按自然语言意图正常处理。
 
 ## Claude Code 使用规则
 
