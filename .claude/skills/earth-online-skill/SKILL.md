@@ -76,11 +76,17 @@ python scripts/tools/<tool>.py render=true
 
 ### 首次初始化
 
+**游戏化建档流程。** 这是玩家首次进入地球 Online 的角色创建环节，请用游戏系统风格呈现。
+
 1. 调用 `init_skill_profile render=true`。
-2. 如果返回 `next_action=ask_required_fields`，按 `required_fields` 逐项询问用户。不要用默认值跳过确认。
+2. 如果返回 `next_action=ask_required_fields`：
+   - 先**自动检测玩家信息**：从当前会话上下文中尝试推断玩家称呼（如系统用户名、Git 用户名、之前的对话中出现的名字等），将检测结果作为"系统检测默认值"展示。
+   - 按工具返回的 `message` 展示角色创建表单（已含游戏风格边框和"系统自检中"等过渡语言）。
+   - 逐项确认，不要直接用默认值跳过。
+   - 如果用户一次性回复了多项信息（如"叫我小明，时区 Asia/Shanghai"），解析并全部填入。
 3. 用户确认必填字段后，调用 `apply_init_config`，显式传入 `confirmed_by_user=true` 和 `confirmed_fields`。
-4. 建档完成后（无论 `initialized=true` 还是 `apply_init_config` 成功），**必须接着推进候选任务导入**（见下一节），不要停在建档消息上。
-5. 如果用户之前已经初始化过，简要确认当前称呼和时区即可，然后直接推进候选导入。
+4. 建档完成后（无论 `initialized=true` 还是 `apply_init_config` 成功），**必须接着推进候选任务导入**（见下一节），不要停在建档消息上。过渡时可以加入"系统就绪，正在加载任务模块..."等游戏化衔接语。
+5. 如果用户之前已经初始化过，用"系统自检完成，玩家档案已就绪"的风格简要确认，然后直接推进候选导入。
 
 ### 候选任务导入（建档后必须执行）
 

@@ -88,13 +88,13 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 
 ### 首次初始化 / 玩家档案
 
-首次使用或用户要求配置地球 Online 时：
+**游戏化建档流程。** 这是玩家首次进入地球 Online 的角色创建环节。
 
 1. 调用 `init_skill_profile`，传入 `render=true`。
-2. 如果返回 `ask_required_fields`，按 `recommended_questions` 询问用户。
-3. 用户明确确认必填字段后，调用 `apply_init_config`，传入 `confirmed_by_user=true`、`confirmed_fields=[...]` 和 `render=true`。
-4. 建档完成后（无论新建档还是已初始化），**必须接着推进候选任务导入**（见下一节），不要停在建档消息上。
-5. 如果用户之前已经初始化过，简要确认当前称呼和时区即可，然后直接推进候选导入。
+2. 如果返回 `ask_required_fields`：先**自动检测玩家信息**（从系统用户名、Git 用户名、会话上下文中推断），作为"系统检测默认值"展示。按工具返回的 `message` 展示角色创建表单。逐项确认，不要直接用默认值跳过。
+3. 用户确认必填字段后，调用 `apply_init_config`，传入 `confirmed_by_user=true`、`confirmed_fields=[...]` 和 `render=true`。
+4. 建档完成后**必须接着推进候选任务导入**（见下一节），过渡时加入游戏化衔接语（如"系统就绪，正在加载任务模块..."）。
+5. 如果用户之前已经初始化过，用"系统自检完成，档案已就绪"的风格简要确认，然后直接推进候选导入。
 
 ### 候选任务导入（建档后必须执行）
 
