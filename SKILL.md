@@ -76,8 +76,9 @@ jiuwenclaw / openclaw 等 adapter 是后续宿主集成方向，不是当前核�
 1. 从当前对话上下文中整理 `raw_candidates`（字符串或带字段的 dict），调用 `suggest_onboarding_imports`，传入 `render=true`。
 2. 工具只生成候选，不会写入任务；展示后让用户确认要导入哪些。
 3. 用户确认后，调用 `apply_onboarding_imports`，把用户选中的候选放在 `selected_candidates`，传入 `render=true`。
-4. 如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
-5. 整个过程不要跳过用户确认。
+4. 如果当前上下文确实提取不出任何候选，不要空调 `suggest_onboarding_imports`。直接问用户想追踪什么任务，然后用 `create_task` 逐个创建。
+5. 如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
+6. 整个过程不要跳过用户确认。
 
 ### 早安 / 开启今日副本
 

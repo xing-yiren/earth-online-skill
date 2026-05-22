@@ -85,7 +85,7 @@ python scripts/tools/suggest_onboarding_imports.py '{"raw_candidates":["每日�
 python scripts/tools/apply_onboarding_imports.py '{"selected_candidates":[{"id":"candidate_001","name":"每日复盘三件事","type":"side","recurrence":"daily","points":20}],"render":true}'
 ```
 
-如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
+如果当前上下文确实提取不出任何候选，不要空调 `suggest_onboarding_imports`。直接问用户想追踪什么任务，然后用 `create_task` 逐个创建。
 
 ### 早安 / 今日副本
 
