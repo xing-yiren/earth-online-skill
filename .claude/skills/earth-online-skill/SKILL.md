@@ -45,20 +45,21 @@ python scripts/tools/<tool>.py render=true
 ### 首次初始化
 
 1. 调用 `init_skill_profile render=true`。
-2. 如果返回 `next_action=ask_required_fields`，只向用户提出需要确认的问题。
-3. 如果返回 `initialized=true`，直接回复工具 `message`，不要重复输出。
-4. 用户明确确认后，再调用 `apply_init_config`。
-5. 不要用默认值跳过确认。
+2. 如果返回 `next_action=ask_required_fields`，按 `required_fields` 逐项询问用户。不要用默认值跳过确认。
+3. 用户确认必填字段后，调用 `apply_init_config`，显式传入 `confirmed_by_user=true` 和 `confirmed_fields`。
+4. 建档完成后（无论 `initialized=true` 还是 `apply_init_config` 成功），**必须接着推进候选任务导入**（见下一节），不要停在建档消息上。
+5. 如果用户之前已经初始化过，简要确认当前称呼和时区即可，然后直接推进候选导入。
 
-### 候选任务导入（可选）
+### 候选任务导入（建档后必须执行）
 
-建档完成后，如果用户想快速导入一批初始任务：
+建档完成后，**不要只回复建档 message 就停下**。你必须主动推进：
 
-1. 由你从当前对话/记忆/计划中整理 `raw_candidates`（字符串或带字段的 dict）。
+1. 从当前对话上下文中整理 `raw_candidates`（字符串列表或带字段的 dict，例如用户提到的待办事项、计划、习惯等）。
 2. 调用 `suggest_onboarding_imports render=true`，它只生成候选，不写任务。
-3. 把候选展示给用户，等待用户确认。
+3. 把候选列表展示给用户，让用户确认要导入哪些。
 4. 用户选好后，把对应条目放入 `selected_candidates`，调用 `apply_onboarding_imports render=true`。
-5. 不要跳过用户确认。
+5. 如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
+6. 整个过程不要跳过用户确认。
 
 ### 早安 / 今日副本
 

@@ -63,11 +63,13 @@ python scripts/tools/init_skill_profile.py '{"render":true}'
 python scripts/tools/apply_init_config.py '{"confirmed_by_user":true,"confirmed_fields":["name","timezone"],"required_fields":["name","timezone"],"name":"DemoUser","timezone":"Asia/Shanghai","render":true}'
 ```
 
+建档完成后（无论新建还是已初始化），**必须接着推进候选任务导入**，不要停在建档消息上。
+
 不要用默认值跳过确认。
 
-### 候选任务导入（可选）
+### 候选任务导入（建档后必须执行）
 
-建档完成后，如果用户希望快速带入一批初始任务，可以走候选导入流程。
+建档完成后，不要只回复建档 message 就停下。必须主动推进：
 
 先由 Claude 整理出候选文本（字符串列表或带字段的 dict），调用：
 
@@ -83,7 +85,7 @@ python scripts/tools/suggest_onboarding_imports.py '{"raw_candidates":["每日�
 python scripts/tools/apply_onboarding_imports.py '{"selected_candidates":[{"id":"candidate_001","name":"每日复盘三件事","type":"side","recurrence":"daily","points":20}],"render":true}'
 ```
 
-只有这一步会真正调用 `create_task` 写入。
+如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
 
 ### 早安 / 今日副本
 
