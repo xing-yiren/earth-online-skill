@@ -26,68 +26,19 @@ def render_daily_settlement(result: dict, player_name: str | None = None) -> str
     points_to_next = result.get("points_to_next_level")
 
     lines = [
-        f"叮！{player_name or '---'} 玩家，今日副本结算完成。",
-        "",
-        f"  日期：{date}" if date else "  日期：今日",
-        "",
-        "▸ 正在结算副本数据...",
-        "▸ 结算完成，奖励已发放 ✓",
-        "",
-        "  ── 通关统计 ──",
-        f"  主线：{main_completed} / {main_total}",
-        f"  支线：{side_completed} / {side_total}",
-        f"  获得积分：+{points_today}",
+        f"[结算数据卡片] {player_name or '---'} | {date or '今日'} | 主线{main_completed}/{main_total} | 支线{side_completed}/{side_total} | +{points_today}积分",
     ]
 
-    # Completed
-    lines.append("")
-    lines.append("  ── 已通关 ──")
     if completed_tasks:
-        for item in completed_tasks:
-            t = _TYPE_LABEL.get(item.get('type'), '任务')
-            lines.append(f"  ✓ {item.get('name')}｜{t}｜+{item.get('points', 0)} 积分")
-    else:
-        lines.append("  （今日无通关记录）")
-
-    # Pending
-    lines.append("")
-    lines.append("  ── 仍待推进 ──")
+        lines.append("已通关: " + " | ".join(f"✓{t.get('name')}+{t.get('points',0)}" for t in completed_tasks))
     if pending_tasks:
-        for item in pending_tasks:
-            lines.append(f"  ○ {item.get('name')}｜{_TYPE_LABEL.get(item.get('type'), '任务')}")
-    else:
-        lines.append("  所有任务已清完，今晚安心休息。")
-
-    # Achievements
+        lines.append("待推进: " + " | ".join(f"○{t.get('name')}" for t in pending_tasks))
     if new_achievements:
-        lines.append("")
-        lines.append("  ── 今日新成就 ──")
-        for item in new_achievements:
-            lines.append(f"  ★ {item.get('name')}")
+        lines.append("新成就: " + " | ".join(a.get('name', '') for a in new_achievements))
 
-    # Status
-    lines.append("")
-    lines.append("  ── 当前状态 ──")
-    lines.append(f"  积分：{current_points}")
-    lines.append(f"  称号：{level_title}")
-    if points_to_next is not None:
-        lines.append(f"  距离下一级：{points_to_next} 积分")
-
-    lines.append("")
-    lines.append(_pick_closing(main_completed, side_completed, points_today))
+    lines.append(f"状态: {current_points}积分 | {level_title}" + (f" | 距下一级{points_to_next}" if points_to_next else ""))
 
     return join_lines(lines)
-
-
-def _pick_closing(main_completed: int, side_completed: int, points_today: int) -> str:
-    total = main_completed + side_completed
-    if total == 0:
-        return "今天没有通关记录，但只要还在记录就不算掉线。明日副本继续。"
-    if points_today >= 100:
-        return "今天推进密度很高，注意收尾休息。明日副本见。"
-    if main_completed > 0:
-        return "主线推进到位，明日继续保持节奏。"
-    return "支线打稳也是稳赢的一天，明日挑个主线试试。"
 
 
 def _render_failure(result: dict, default: str) -> str:

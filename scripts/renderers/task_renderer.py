@@ -24,21 +24,12 @@ def render_task_created(result: dict) -> str:
     deadline = task.get("deadline")
 
     lines = [
-        f"叮！{type_label}任务已登记 ✓",
-        "",
-        f"  {icon} {name}",
-        f"  类型：{type_label}",
-        f"  奖励：{points} 积分",
+        f"[任务登记] {icon} {name} | {type_label} | {points}积分",
     ]
     if recurrence:
-        lines.append(f"  频率：{recurrence}")
+        lines.append(f"频率: {recurrence}" if recurrence else "")
     if deadline:
-        lines.append(f"  截止：{deadline}")
-
-    if task.get("type") == "side" and task.get("recurrence") == "daily":
-        lines.extend(["", "这条支线已加入每日副本，完成时告诉我即可打卡。"])
-    else:
-        lines.extend(["", '完成后告诉我"XX 做完了"即可通关。'])
+        lines.append(f"截止: {deadline}" if deadline else "")
 
     return join_lines(lines)
 
@@ -60,62 +51,31 @@ def render_task_completed(result: dict) -> str:
     unlocked = result.get("unlocked_achievements") or []
 
     lines = [
-        f"叮！{name} 已通关，奖励已发放 ✓",
-        "",
-        f"  {icon} {name}",
-        f"  获得积分：+{points_earned}",
+        f"[任务通关] {icon} {name} | +{points_earned}积分 | 当前{current_points}积分 | {level_title}" + (f" | 距下一级{points_to_next}" if points_to_next else ""),
     ]
 
     if unlocked:
-        lines.append("")
-        lines.append("  ── 同时解锁成就 ──")
-        for achievement in unlocked:
-            lines.append(f"  ★ {achievement.get('name', '未知')}：{achievement.get('reason', '')}（+{achievement.get('reward_points', 0)} 积分）")
-
-    lines.append("")
-    lines.append("  ── 当前状态 ──")
-    lines.append(f"  积分：{current_points}")
-    lines.append(f"  称号：{level_title}")
-    if points_to_next is not None:
-        lines.append(f"  距离下一级：{points_to_next} 积分")
-    lines.append("")
-    lines.append("今日推进 +1，继续保持。")
+        lines.append("新成就: " + " | ".join(f"{a.get('name')}(+{a.get('reward_points', 0)})" for a in unlocked))
 
     return join_lines(lines)
 
 
 def render_active_tasks(tasks: list[dict]) -> str:
     if not tasks:
-        return join_lines([
-            "▸ 当前没有进行中的任务",
-            "",
-            '  可以说"我今天要做 XXX"登记主线，',
-            '  或"以后每天 XXX"登记支线习惯。',
-        ])
+        return "[任务列表] 暂无进行中任务"
 
-    main_items = []
-    side_items = []
-    for task in tasks:
-        line = _format_active_task(task)
-        if task.get("type") == "main":
-            main_items.append(f"  ◈ {line}")
-        elif task.get("type") == "side":
-            side_items.append(f"  ◇ {line}")
+    main_items = [_format_active_task(t) for t in tasks if t.get("type") == "main"]
+    side_items = [_format_active_task(t) for t in tasks if t.get("type") == "side"]
 
-    lines = ["▸ 当前任务列表", ""]
-
-    lines.append("  ── 主线任务 ──")
+    lines = ["[任务列表]"]
     if main_items:
-        lines.extend(main_items)
+        lines.append("主线: " + " | ".join(f"◈{m}" for m in main_items))
     else:
-        lines.append("  （暂无）")
-
-    lines.append("")
-    lines.append("  ── 支线任务 ──")
+        lines.append("主线: 暂无")
     if side_items:
-        lines.extend(side_items)
+        lines.append("支线: " + " | ".join(f"◇{s}" for s in side_items))
     else:
-        lines.append("  （暂无）")
+        lines.append("支线: 暂无")
 
     return join_lines(lines)
 
@@ -130,16 +90,9 @@ def render_task_updated(result: dict) -> str:
     points = task.get("points", 0)
     deadline = task.get("deadline")
 
-    lines = [
-        "▸ 任务已更新 ✓",
-        "",
-        f"  任务：{name}",
-    ]
-    if changed:
-        lines.append(f"  变更：{', '.join(changed)}")
-    lines.append(f"  奖励：{points} 积分")
+    lines = [f"[任务更新] {name}" + (f" | 变更:{','.join(changed)}" if changed else "") + f" | {points}积分"]
     if deadline:
-        lines.append(f"  截止：{deadline}")
+        lines.append(f"截止: {deadline}" if deadline else "")
 
     return join_lines(lines)
 
@@ -150,10 +103,7 @@ def render_task_cancelled(result: dict) -> str:
 
     task = result.get("task", {}) or {}
     name = task.get("name", "未命名任务")
-    return join_lines([
-        f"▸ 已取消任务：{name}",
-        "如果误操作，直接说重新创建一个同名任务即可。",
-    ])
+    return f"[任务取消] {name}"
 
 
 def _format_active_task(task: dict) -> str:

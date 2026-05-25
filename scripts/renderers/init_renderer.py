@@ -23,19 +23,10 @@ def render_init_profile(result: dict) -> str:
         profile = result.get("suggested_profile", {}) or {}
         name = profile.get("name") or "玩家"
         tz = profile.get("timezone") or "---"
-        lines = [
-            "▸ 地球 Online 系统已就绪",
-            "",
-            f"  当前登录：{name}",
-            f"  所在时区：{tz}",
-        ]
-        if name == "玩家":
-            lines.append("")
-            lines.append("⚠ 系统检测到玩家称号仍为默认值，建议先更新称号。是否修改？")
-        else:
-            lines.append("")
-            lines.append("欢迎回来，今天也请多指教。")
-        return join_lines(lines)
+        warn = (name == "玩家")
+        return join_lines([
+            f"[系统状态] 已就绪 | 当前登录:{name} | 时区:{tz}" + (" | ⚠称号为默认值" if warn else ""),
+        ])
 
     next_action = result.get("next_action")
     required_fields = result.get("required_fields") or []
@@ -61,41 +52,24 @@ def render_init_profile(result: dict) -> str:
 
 
 def _render_character_create(required_fields: list[str], fallback: dict, questions: list[str]) -> str:
-    lines = [
-        "╔══════════════════════════╗",
-        "║   地球 Online · 玩家建档  ║",
-        "╚══════════════════════════╝",
-        "",
-        "▸ 系统自检中...",
-        "▸ 检测到新玩家，启动建档流程...",
-        "",
-        "请确认以下档案信息：",
-        "",
-    ]
+    lines = ["[玩家建档] 新玩家检测 | 请确认以下信息"]
     field_index = 1
     for field in required_fields:
         label = _FIELD_LABELS.get(field, field)
         default = fallback.get(field, "---")
-        lines.append(f"  [{field_index}] {label}：___________（系统检测默认：{default}）")
+        lines.append(f"  [{field_index}] {label} (默认: {default})")
         field_index += 1
-
     if questions:
         lines.append("")
-        lines.append('你可以逐项回复修改，也可以直接说"确认"使用系统默认值。')
-    else:
-        lines.append("")
-        lines.append("请回复确认，或指出需要修改的项目编号和值。")
-
+        for q in questions:
+            lines.append(f"  ? {q}")
+    lines.append("")
+    lines.append('回复"确认"使用默认值，或逐项修改。')
     return join_lines(lines)
 
 
 def _render_optional_config(optional_fields: list[str], questions: list[str]) -> str:
-    lines = [
-        "▸ 基础档案已确认 ✓",
-        "",
-        '以下为偏好设置，可以直接说"确认"跳过：',
-        "",
-    ]
+    lines = ["[偏好设置] 基础档案已确认 | 可选配置"]
     for field in optional_fields:
         label = _FIELD_LABELS.get(field, field)
         lines.append(f"  [{field}] {label}")
@@ -104,7 +78,7 @@ def _render_optional_config(optional_fields: list[str], questions: list[str]) ->
         for q in questions:
             lines.append(f"  ? {q}")
     lines.append("")
-    lines.append('你想调整哪些？没有的话直接回复"确认"即可。')
+    lines.append('直接说"确认"跳过，或指出要调整的项。')
     return join_lines(lines)
 
 
@@ -131,12 +105,7 @@ def render_apply_init_config(result: dict) -> str:
     grace = profile.get("early_bird_grace_minutes", 30)
 
     return join_lines([
-        f"叮！欢迎 {name} 玩家登入地球 Online 系统 ✓",
-        "",
-        f"  所在时区：{tz}",
-        f"  晨间签到窗口：{morning} ± {grace} min",
-        "",
-        "系统加载完成，正在进入任务模块...",
+        f"[建档完成] {name}玩家 | 时区:{tz} | 晨间窗口:{morning}±{grace}min | 系统就绪",
     ])
 
 
