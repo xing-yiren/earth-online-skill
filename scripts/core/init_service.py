@@ -152,11 +152,13 @@ class InitService:
                 "unresolved_fields": unresolved_fields,
             }
 
+        cf = confirmed_fields if isinstance(confirmed_fields, dict) else {}
+
         profile = {
             "user_id": payload.get("user_id") or "demo-user",
-            "name": payload.get("name") or DEFAULT_PLAYER_NAME,
-            "timezone": payload.get("timezone") or DEFAULT_TIMEZONE,
-            "style": payload.get("style") or DEFAULT_STYLE,
+            "name": cf.get("name") or payload.get("name") or DEFAULT_PLAYER_NAME,
+            "timezone": cf.get("timezone") or payload.get("timezone") or DEFAULT_TIMEZONE,
+            "style": cf.get("style") or payload.get("style") or DEFAULT_STYLE,
             "morning_broadcast": payload.get("morning_broadcast") or "07:00",
             "evening_settlement": payload.get("evening_settlement") or "22:00",
             "broadcast_channel": payload.get("broadcast_channel") or "webchat",
