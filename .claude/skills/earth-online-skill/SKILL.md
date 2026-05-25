@@ -94,7 +94,7 @@ python scripts/tools/<tool>.py render=true
 
 1. 从当前对话上下文中整理 `raw_candidates`（字符串列表或带字段的 dict，例如用户提到的待办事项、计划、习惯等）。
 2. **如果有可提取的候选**：调用 `suggest_onboarding_imports`，把 `raw_candidates` 作为 JSON 数组传入。展示候选列表，让用户确认要导入哪些。用户选好后，把对应条目放入 `selected_candidates`，调用 `apply_onboarding_imports render=true`。
-3. **如果当前上下文确实提取不出任何候选**：不要空调 `suggest_onboarding_imports`。直接问用户："你今天想追踪哪些任务？比如有没有主线任务要做，或者想坚持的日常习惯？"然后根据用户回答用 `create_task` 逐个创建。
+3. **如果当前上下文候选较少或为空**：**必须主动询问用户**："要不要我扫描你所有项目的 Claude Code 会话记录，从中提取可能遗漏的任务？" —— 如果用户同意，走跨会话任务扫描流程（见下方）；如果用户拒绝，再问用户今天想追踪什么任务。
 4. 如果用户说"都不要"或"跳过"，尊重用户选择，直接进入今日副本。
 5. 整个过程不要跳过用户确认。
 
