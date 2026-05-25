@@ -75,15 +75,34 @@ class SessionScanner:
             all_candidates.extend(candidates)
             scanned_sessions += session_count
 
+        # Deduplicate and keep top per project
         seen = set()
-        unique = []
+        project_buckets: dict[str, list[dict]] = {}
         for c in sorted(all_candidates, key=lambda c: c.get("score", 0), reverse=True):
             key = c["name"].strip().lower()
             if key not in seen:
                 seen.add(key)
-                # Remove internal scoring field from output
-                c.pop("score", None)
-                unique.append(c)
+                proj = c.get("source_detail", "").replace("会话记录（", "").replace("）", "")
+                project_buckets.setdefault(proj, []).append(c)
+
+        # Synthesize project-level direction summaries
+        summaries = self._synthesize_project_summaries(project_buckets)
+
+        # Build final candidate list: summaries first, then top specifics
+        unique = []
+        seen_keys = set()
+        for s in summaries:
+            if s["name"].strip().lower() not in seen_keys:
+                seen_keys.add(s["name"].strip().lower())
+                unique.append(s)
+
+        for proj, items in project_buckets.items():
+            for c in items[:3]:  # top 3 per project
+                name = c["name"].strip().lower()
+                if name not in seen_keys:
+                    seen_keys.add(name)
+                    c.pop("score", None)
+                    unique.append(c)
 
         return {
             "success": True,
@@ -227,6 +246,70 @@ class SessionScanner:
             score += 2
 
         return min(score, 10)
+
+    def _synthesize_project_summaries(self, project_buckets: dict[str, list[dict]]) -> list[dict]:
+        """For projects with multiple candidates, generate a directional summary candidate."""
+        summaries = []
+        for proj, items in project_buckets.items():
+            if len(items) < 2:
+                continue
+
+            # Derive a human-readable project label
+            label = self._project_label(proj)
+
+            # Extract key verbs/nouns from candidate names to guess the theme
+            all_names = " ".join(c["name"] for c in items)
+            theme = self._guess_project_theme(all_names, label)
+
+            summaries.append({
+                "name": f"继续推进 {label} 项目：{theme}",
+                "type": "main",
+                "recurrence": "once",
+                "points": 80,
+                "source": "session_scan",
+                "source_detail": f"跨会话扫描 · {proj}（{len(items)} 条相关会话）",
+                "raw_text": f"项目方向摘要：{label}",
+                "score": 10,  # summaries always sort first
+            })
+
+        return summaries
+
+    def _project_label(self, project_dir_name: str) -> str:
+        """Convert a project directory name into a readable label."""
+        # Handle the -to-path encoding: D--github-projects-earth-online-skill
+        parts = project_dir_name.split("--")
+        # Take the last meaningful segment
+        meaningful = [p for p in parts if p and not p.startswith("D-") and not p.startswith("C-")]
+        if not meaningful:
+            meaningful = [p for p in parts if p]
+        # Use the last part as the primary label
+        label = meaningful[-1] if meaningful else project_dir_name
+        # Replace dashes with spaces, capitalize
+        label = label.replace("-", " ").strip()
+        return label
+
+    def _guess_project_theme(self, all_names: str, label: str) -> str:
+        """Guess a project theme from the text of all candidate names."""
+        # Count keyword categories
+        doc_keywords = ["审查", "教程", "文档", "doc", "README", "指南", "说明", "blog", "文章"]
+        dev_keywords = ["开发", "实现", "修复", "重构", "优化", "升级", "部署", "测试", "bug"]
+        feature_keywords = ["功能", "特性", "feature", "模块", "页面", "组件", "接口", "API"]
+        plan_keywords = ["计划", "规划", "TODO", "方向", "目标", "整理", "梳理", "确认"]
+        data_keywords = ["数据", "采集", "爬", "抓取", "更新", "同步", "统计", "分析"]
+        config_keywords = ["配置", "设置", "参数", "字段", "参数", "格式"]
+
+        counts = {
+            "文档与教程完善": sum(1 for kw in doc_keywords if kw in all_names),
+            "功能开发与改进": sum(1 for kw in dev_keywords if kw in all_names) + sum(1 for kw in feature_keywords if kw in all_names),
+            "项目规划与梳理": sum(1 for kw in plan_keywords if kw in all_names),
+            "数据采集与更新": sum(1 for kw in data_keywords if kw in all_names),
+            "配置与参数调整": sum(1 for kw in config_keywords if kw in all_names),
+        }
+
+        best = max(counts, key=lambda k: counts[k])
+        if counts[best] > 0:
+            return best
+        return "后续推进"
 
     def _summarize_task(self, text: str) -> str:
         """Create a concise task name from the raw message."""
