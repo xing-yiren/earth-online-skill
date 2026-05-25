@@ -1,23 +1,30 @@
-"""Reward-related renderers."""
+"""Reward-related renderers - game-style reward shop."""
 
 from __future__ import annotations
 
-from ._format import join_lines, section
+from ._format import join_lines
 
 
 def render_reward_list(result: dict) -> str:
     if not result.get("success"):
-        return _render_failure(result, default="奖励列表读取失败。")
+        return _render_failure(result, default="⚠ 奖励商店读取失败。")
 
     rewards = result.get("rewards") or []
     if not rewards:
-        return "当前没有可兑换奖励。"
+        return "▸ 奖励商店暂时空置，等积分攒起来了再来看看。"
 
-    items = [
-        f"{reward.get('name')}｜{reward.get('cost', 0)} 积分｜{reward.get('description', '')}"
-        for reward in rewards
-    ]
-    return join_lines(["当前可兑换奖励：", "", *section("奖励目录", items)])
+    items = []
+    for r in rewards:
+        items.append(f"  • {r.get('name')}｜{r.get('cost', 0)} 积分｜{r.get('description', '')}")
+
+    return join_lines([
+        "▸ 当前可兑换奖励",
+        "",
+        "  ── 奖励商店 ──",
+        *items,
+        "",
+        '想兑换哪个？说"我想兑换 XX"即可预览。',
+    ])
 
 
 def render_reward_preview(result: dict) -> str:
@@ -30,55 +37,53 @@ def render_reward_preview(result: dict) -> str:
         current_points = result.get("current_points", 0)
         cost = reward.get("cost", 0)
         remaining = current_points - cost
+        name = reward.get('name', '未命名奖励')
+
         if remaining < 0:
-            return join_lines(
-                [
-                    "当前积分还不够兑换这个奖励。",
-                    f"【{reward.get('name', '未命名奖励')}】需要 {cost} 积分",
-                    f"你当前有 {current_points} 积分",
-                    f"还差：{abs(remaining)} 积分",
-                    "",
-                    "可以先完成一个主线任务，或者清几个支线任务再回来兑换。",
-                ]
-            )
-        return join_lines(
-            [
-                "检测到你想兑换奖励：",
+            return join_lines([
+                "▸ 积分不足",
                 "",
-                f"【{reward.get('name', '未命名奖励')}】",
-                f"消耗：{cost} 积分",
-                f"当前积分：{current_points}",
-                f"兑换后剩余：{remaining} 积分",
+                f"  {name} 需要 {cost} 积分",
+                f"  当前积分：{current_points}",
+                f"  还差：{abs(remaining)} 积分",
                 "",
-                "确认兑换吗？你可以回复“确认兑换”。",
-            ]
-        )
+                "先完成一个主线或几个支线再回来兑换。",
+            ])
+
+        return join_lines([
+            "▸ 奖励兑换预览",
+            "",
+            f"  奖励：{name}",
+            f"  消耗：{cost} 积分",
+            f"  兑换前积分：{current_points}",
+            f"  兑换后剩余：{remaining} 积分",
+            "",
+            '确认兑换吗？回复"确认兑换"。',
+        ])
+
     if error == "insufficient_points":
         reward = result.get("reward", {}) or {}
         required = result.get("required", reward.get("cost", 0))
         current = result.get("current_points", 0)
-        reward_name = reward.get("name")
-        lines = ["当前积分还不够兑换这个奖励。"]
-        if reward_name:
-            lines.append(f"【{reward_name}】需要 {required} 积分")
-        else:
-            lines.append(f"需要积分：{required}")
-        lines.extend(
-            [
-                f"当前积分：{current}",
-                f"还差：{max(required - current, 0)} 积分",
-                "",
-                "可以先完成一个主线任务，或者清几个支线任务再回来兑换。",
-            ]
-        )
-        return join_lines(lines)
+        name = reward.get("name")
+        return join_lines([
+            "▸ 积分不足",
+            "",
+            f"  {name or '该奖励'} 需要 {required} 积分",
+            f"  当前积分：{current}",
+            f"  还差：{max(required - current, 0)} 积分",
+            "",
+            "先完成一个主线或几个支线再回来兑换。",
+        ])
+
     if error == "needs_confirmation":
         candidates = result.get("candidates") or []
-        lines = ["匹配到多个奖励，请确认想兑换哪一个："]
-        for index, reward in enumerate(candidates, 1):
-            lines.append(f"{index}. {reward.get('name')}｜{reward.get('cost', 0)} 积分")
+        lines = ["▸ 匹配到多个奖励，请确认：", ""]
+        for i, reward in enumerate(candidates, 1):
+            lines.append(f"  {i}. {reward.get('name')}｜{reward.get('cost', 0)} 积分")
         return join_lines(lines)
-    return _render_failure(result, default="奖励兑换暂时无法继续。")
+
+    return _render_failure(result, default="⚠ 奖励兑换暂时无法继续。")
 
 
 def render_reward_redeemed(result: dict) -> str:
@@ -91,17 +96,15 @@ def render_reward_redeemed(result: dict) -> str:
     cost = redemption.get("cost", reward.get("cost", 0))
     points_after = redemption.get("points_after", stats.get("available_points", 0))
 
-    return join_lines(
-        [
-            "兑换成功。",
-            "",
-            f"奖励：【{reward.get('name', '未命名奖励')}】",
-            f"消耗积分：{cost}",
-            f"剩余积分：{points_after}",
-            "",
-            "本次奖励已经记录进兑换历史。记得真的去享受它，不要只是在系统里兑换。",
-        ]
-    )
+    return join_lines([
+        "▸ 兑换成功 ✓",
+        "",
+        f"  奖励：{reward.get('name', '未命名奖励')}",
+        f"  消耗积分：{cost}",
+        f"  剩余积分：{points_after}",
+        "",
+        "已记录进兑换历史。记得真的去享受它！",
+    ])
 
 
 def _render_failure(result: dict, default: str) -> str:
