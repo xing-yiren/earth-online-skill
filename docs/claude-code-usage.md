@@ -1,18 +1,25 @@
 # Claude Code Usage Guide
 
-> 地球 Online 当前优先按 Claude Code 原生 Skill 使用和验证。jiuwenclaw / openclaw adapter 保留为后续宿主集成方向。
+> 地球 Online 当前优先按 Claude Code 原生 Skill 使用和验证。
 
-## Skill 安装位置
+## Skill 安装方式
 
-Claude Code 项目级 skill 需要放在：
+### 全局安装（推荐）
 
-```text
-.claude/skills/earth-online-skill/SKILL.md
-```
+全局 skill 安装到 `~/.claude/skills/earth-online-skill/SKILL.md`，可在**任意项目**的 Claude Code 会话中调用。
 
-当前仓库已经按这个路径安装，仓库根目录的 `SKILL.md` 仅保留为文档说明，不作为 Claude Code 自动识别入口。
+数据存放在 `~/.earth-online/data/`，所有项目共享同一份任务和积分状态。
 
-如果当前会话是在安装 skill 之前启动的，通常需要重新进入仓库或重启 Claude Code，会话里的 skill 列表才会刷新。
+安装步骤：
+1. 确保仓库在 `D:/github_projects/earth-online-skill`
+2. 全局 skill 使用绝对路径调用工具，不依赖当前工作目录
+3. 数据目录首次使用时会自动从 seed data 初始化
+
+### 项目安装（开发/测试用）
+
+项目级 skill 放在 `.claude/skills/earth-online-skill/SKILL.md`，仅在当前项目中生效。
+
+当前仓库已同时包含两种安装方式，仓库根目录的 `SKILL.md` 为文档参考。
 
 ## Skill 触发验证
 
