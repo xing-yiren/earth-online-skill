@@ -129,7 +129,7 @@ def _pick_encouragement(main_tasks: list, side_tasks: list) -> str:
     if not main_tasks and not side_tasks:
         return "今天从一件小事开始，先把节奏起出来——主线或支线，开局就是胜利。"
     if main_tasks:
-        return "不用完美通关，先推进一个主线就算首胜。准备好了吗？"
+        return "不用完美通关，推进一个主线就是好的开始。"
     return "没有重磅主线，把支线打稳也是稳赢的一天。"
 
 

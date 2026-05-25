@@ -30,7 +30,7 @@ def render_daily_settlement(result: dict, player_name: str | None = None) -> str
         "║     副本结算 · 战报       ║",
         "╚══════════════════════════╝",
         "",
-        f"  {player_name or '---'}，今日战果如下：",
+        f"  {player_name or '---'}，副本结算如下：",
         f"  日期：{date}" if date else "  日期：今日",
         "",
         "▸ 结算中...",
