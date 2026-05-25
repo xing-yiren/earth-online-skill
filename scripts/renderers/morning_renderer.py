@@ -20,21 +20,19 @@ def render_morning_brief(result: dict) -> str:
     current_points = result.get("current_points", 0)
     level_title = result.get("level_title", "新手玩家")
 
+    day_label = "首次登录" if survival_days <= 1 else f"累计 {survival_days} 天"
+
     lines = [
-        "╔══════════════════════════╗",
-        "║     今日副本 · 开启       ║",
-        "╚══════════════════════════╝",
+        f"叮！亲爱的 {player} 玩家，早上好！",
         "",
-        f"  欢迎回来，{player}。",
-        f"  今天是你在线上地球的第 {survival_days} 天。",
+        f"恭喜你通过昨日生存关卡，当前累计登录：{day_label}。",
+        f"连续早起签到：{streak} 天",
         "",
-        "▸ 加载副本数据...",
-        "▸ 今日任务已就绪 ✓",
+        "▸ 今日副本正在开启...",
+        "▸ 主线 / 支线任务已刷新 ✓",
         "",
-        "  ── 玩家状态 ──",
-        f"  连续签到：{streak} 天",
-        f"  称号：{level_title}",
-        f"  积分：{current_points}",
+        f"  当前称号：{level_title}",
+        f"  当前积分：{current_points}",
     ]
 
     main_items = [_format_main(task) for task in main_tasks]
@@ -55,7 +53,7 @@ def render_morning_brief(result: dict) -> str:
         lines.append("  （暂无）可挑一个想坚持的习惯，如阅读、运动、冥想。")
 
     lines.append("")
-    lines.append(_pick_encouragement(main_tasks, side_tasks))
+    lines.append(_pick_closing(main_tasks, side_tasks))
 
     return join_lines(lines)
 
@@ -125,11 +123,11 @@ def _format_side(task: dict) -> str:
     return f"{name}｜{points} 积分{suffix}"
 
 
-def _pick_encouragement(main_tasks: list, side_tasks: list) -> str:
+def _pick_closing(main_tasks: list, side_tasks: list) -> str:
     if not main_tasks and not side_tasks:
-        return "今天从一件小事开始，先把节奏起出来——主线或支线，开局就是胜利。"
+        return "今天从一件小事开始，先把节奏起出来。主线或支线，开局就是胜利。"
     if main_tasks:
-        return "不用完美通关，推进一个主线就是好的开始。"
+        return "今日副本已开启，祝玩家通关顺利。"
     return "没有重磅主线，把支线打稳也是稳赢的一天。"
 
 
