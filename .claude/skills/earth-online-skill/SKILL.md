@@ -28,7 +28,7 @@ description: >
 
 | 命令 | 映射工具 |
 |------|---------|
-| `init` | `init_skill_profile`，然后按首次初始化流程推进 |
+| `init` | 启动建档流程。如果已初始化，询问"重新建档"还是"查看当前档案" |
 | `checkin` / `早安` / `签到` | `record_morning_checkin` + `get_morning_brief` |
 | `tasks` / `任务` | `list_active_tasks` |
 | `create` / `创建` | 询问任务名称和类型后调用 `create_task` |
@@ -86,7 +86,7 @@ python scripts/tools/<tool>.py render=true
    - 如果用户一次性回复了多项信息（如"叫我小明，时区 Asia/Shanghai"），解析并全部填入。
 3. 用户确认必填字段后，调用 `apply_init_config`，显式传入 `confirmed_by_user=true` 和 `confirmed_fields`。
 4. 建档完成后（无论 `initialized=true` 还是 `apply_init_config` 成功），**必须接着推进候选任务导入**（见下一节），不要停在建档消息上。过渡时可以加入"系统就绪，正在加载任务模块..."等游戏化衔接语。
-5. 如果用户之前已经初始化过：用"系统自检完成，档案已就绪"的风格简要确认。如果玩家称号仍为默认值"玩家"，**必须先建议用户更新称号**，然后再推进候选导入。
+5. 如果用户之前已经初始化过，但**用户明确输入了 `init` 命令**：说明用户想要重新建档。先展示当前档案，然后问"要重新建档吗？"——如果用户确认，调用 `apply_init_config` 传入新值覆盖；如果用户拒绝，直接推进候选导入。如果玩家称号仍为默认值"玩家"，**必须先建议用户更新称号**。
 
 ### 候选任务导入（建档后必须执行）
 
