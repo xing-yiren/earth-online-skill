@@ -106,8 +106,10 @@ python scripts/tools/<tool>.py render=true
 
 ### 创建任务
 
-- 主线通常用 `create_task(type=main, recurrence=once)`
-- 习惯型任务通常用 `create_task(type=side, recurrence=daily)`
+- `create_task` 最常用参数：`name`（任务名称，必填）、`type`（`main`/`side`）、`recurrence`（`once`/`daily`）、`points`（积分）、`deadline`（截止日期）、`notes`（备注）
+- 主线：`create_task(name="XX", type=main, recurrence=once)`
+- 习惯：`create_task(name="XX", type=side, recurrence=daily)`
+- 注意参数名是 `name`，不是 `title`
 
 ### 完成任务
 
