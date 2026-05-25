@@ -25,14 +25,13 @@ def render_morning_brief(result: dict) -> str:
         "║     今日副本 · 开启       ║",
         "╚══════════════════════════╝",
         "",
-        f"  玩家：{player}",
-        f"  日期：{date}" if date else "  日期：今日",
+        f"  欢迎回来，{player}。",
+        f"  今天是你在线上地球的第 {survival_days} 天。",
         "",
-        "▸ 系统自检中...",
-        "▸ 副本数据加载完成 ✓",
+        "▸ 加载副本数据...",
+        "▸ 今日任务已就绪 ✓",
         "",
         "  ── 玩家状态 ──",
-        f"  生存天数：{survival_days} 天",
         f"  连续签到：{streak} 天",
         f"  称号：{level_title}",
         f"  积分：{current_points}",
@@ -76,14 +75,14 @@ def render_morning_checkin(result: dict) -> str:
 
     if already:
         lines = [
-            "▸ 今日签到已完成",
+            "▸ 今日已签到，每日奖励已领取",
             "",
             f"  连续早起：{streak} 天 ｜ 历史最佳：{best} 天",
         ]
     elif is_early:
         lines = [
             "▸ 晨间签到成功 ✓",
-            "▸ 已进入早起窗口",
+            "▸ 已进入早起窗口，每日登录奖励已发放",
             "",
             f"  连续早起：{streak} 天 ｜ 历史最佳：{best} 天",
         ]

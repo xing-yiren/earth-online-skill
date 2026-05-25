@@ -81,12 +81,13 @@ class InitService:
             recommended_questions.append(
                 "我目前还不确定你的称呼，想确认一下我应该怎么称呼你？"
             )
-        if not current_profile["morning_target_time"]:
-            required_fields.append("morning_target_time")
-            recommended_questions.append("默认几点算你的晨间目标时间？")
-        if not current_profile["early_bird_grace_minutes"]:
-            required_fields.append("early_bird_grace_minutes")
-            recommended_questions.append("早起宽限几分钟比较合适？")
+        # Morning/evening settings are always offered as optional items
+        optional_fields.append("morning_target_time")
+        optional_fields.append("early_bird_grace_minutes")
+        optional_fields.append("evening_settlement")
+        recommended_questions.append("几点算你的晨间目标时间？（默认 07:00）")
+        recommended_questions.append("早起宽限几分钟比较合适？（默认 30）")
+        recommended_questions.append("晚间结算时间？（默认 22:00）")
         if not current_profile["style"]:
             optional_fields.append("style")
             recommended_questions.append("你更喜欢轻度、标准还是热血一点的表达风格？")

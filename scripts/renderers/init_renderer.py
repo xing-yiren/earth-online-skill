@@ -1,4 +1,4 @@
-"""Onboarding and initialization renderers — game-style character creation."""
+"""Onboarding and initialization renderers - game-style character creation."""
 
 from __future__ import annotations
 
@@ -9,8 +9,9 @@ _FIELD_LABELS = {
     "name": "玩家称号",
     "timezone": "时区",
     "style": "表达风格",
-    "morning_target_time": "晨间目标时间",
+    "morning_target_time": "晨间签到窗口",
     "early_bird_grace_minutes": "早起宽限",
+    "evening_settlement": "晚间结算时间",
 }
 
 
@@ -25,7 +26,7 @@ def render_init_profile(result: dict) -> str:
         lines = [
             "▸ 地球 Online 系统已就绪",
             "",
-            f"  当前登录玩家：{name}",
+            f"  当前登录：{name}",
             f"  所在时区：{tz}",
         ]
         if name == "玩家":
@@ -33,7 +34,7 @@ def render_init_profile(result: dict) -> str:
             lines.append("⚠ 系统检测到玩家称号仍为默认值，建议先更新称号。是否修改？")
         else:
             lines.append("")
-            lines.append("系统自检完成，可以进入今日副本。")
+            lines.append("欢迎回来，今天也请多指教。")
         return join_lines(lines)
 
     next_action = result.get("next_action")
@@ -90,16 +91,20 @@ def _render_character_create(required_fields: list[str], fallback: dict, questio
 
 def _render_optional_config(optional_fields: list[str], questions: list[str]) -> str:
     lines = [
-        "▸ 基础档案已确认",
+        "▸ 基础档案已确认 ✓",
         "",
-        "以下为可选偏好设置，可以直接跳过：",
+        '以下为偏好设置，可以直接说"确认"跳过：',
         "",
     ]
     for field in optional_fields:
-        lines.append(f"  - {_FIELD_LABELS.get(field, field)}")
+        label = _FIELD_LABELS.get(field, field)
+        lines.append(f"  [{field}] {label}")
     if questions:
         lines.append("")
-        lines.extend(f"  ? {q}" for q in questions)
+        for q in questions:
+            lines.append(f"  ? {q}")
+    lines.append("")
+    lines.append('你想调整哪些？没有的话直接回复"确认"即可。')
     return join_lines(lines)
 
 
@@ -126,18 +131,13 @@ def render_apply_init_config(result: dict) -> str:
     grace = profile.get("early_bird_grace_minutes", 30)
 
     return join_lines([
-        "╔══════════════════════════╗",
-        "║     玩家档案 · 创建完成   ║",
-        "╚══════════════════════════╝",
+        "▸ 玩家数据写入完成 ✓",
         "",
-        "▸ 正在写入玩家数据...",
-        "▸ 写入完成 ✓",
-        "",
-        f"  玩家称号：{name}",
-        f"  时区：{tz}",
+        f"  玩家 {name} 已登入地球 Online 系统",
+        f"  所在时区：{tz}",
         f"  晨间签到窗口：{morning} ± {grace} min",
         "",
-        "系统就绪，接下来进入任务导入环节。",
+        "系统加载完成，正在进入任务模块...",
     ])
 
 
