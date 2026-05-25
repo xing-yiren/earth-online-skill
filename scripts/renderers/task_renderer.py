@@ -24,7 +24,7 @@ def render_task_created(result: dict) -> str:
     deadline = task.get("deadline")
 
     lines = [
-        "▸ 任务登记成功 ✓",
+        f"叮！{type_label}任务已登记 ✓",
         "",
         f"  {icon} {name}",
         f"  类型：{type_label}",
@@ -36,9 +36,9 @@ def render_task_created(result: dict) -> str:
         lines.append(f"  截止：{deadline}")
 
     if task.get("type") == "side" and task.get("recurrence") == "daily":
-        lines.extend(["", "这条支线会保留在每日副本里，从今天开始。完成时告诉我即可打卡。"])
+        lines.extend(["", "这条支线已加入每日副本，完成时告诉我即可打卡。"])
     else:
-        lines.extend(["", '完成后告诉我"XX 做完了"，帮你结算积分。'])
+        lines.extend(["", '完成后告诉我"XX 做完了"即可通关。'])
 
     return join_lines(lines)
 
@@ -60,10 +60,10 @@ def render_task_completed(result: dict) -> str:
     unlocked = result.get("unlocked_achievements") or []
 
     lines = [
-        "▸ 任务通关 ✓",
+        f"叮！{name} 已通关，奖励已发放 ✓",
         "",
         f"  {icon} {name}",
-        f"  奖励积分：+{points_earned}",
+        f"  获得积分：+{points_earned}",
     ]
 
     if unlocked:
@@ -79,7 +79,7 @@ def render_task_completed(result: dict) -> str:
     if points_to_next is not None:
         lines.append(f"  距离下一级：{points_to_next} 积分")
     lines.append("")
-    lines.append("今日推进 +1，节奏稳住。")
+    lines.append("今日推进 +1，继续保持。")
 
     return join_lines(lines)
 

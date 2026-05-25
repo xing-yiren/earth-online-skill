@@ -97,9 +97,8 @@ def render_reward_redeemed(result: dict) -> str:
     points_after = redemption.get("points_after", stats.get("available_points", 0))
 
     return join_lines([
-        "▸ 兑换成功 ✓",
+        f"叮！{reward.get('name', '未命名奖励')} 兑换成功 ✓",
         "",
-        f"  奖励：{reward.get('name', '未命名奖励')}",
         f"  消耗积分：{cost}",
         f"  剩余积分：{points_after}",
         "",

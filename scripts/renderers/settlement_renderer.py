@@ -26,20 +26,17 @@ def render_daily_settlement(result: dict, player_name: str | None = None) -> str
     points_to_next = result.get("points_to_next_level")
 
     lines = [
-        "╔══════════════════════════╗",
-        "║     副本结算 · 战报       ║",
-        "╚══════════════════════════╝",
+        f"叮！{player_name or '---'} 玩家，今日副本结算完成。",
         "",
-        f"  {player_name or '---'}，副本结算如下：",
         f"  日期：{date}" if date else "  日期：今日",
         "",
-        "▸ 结算中...",
-        "▸ 战报生成 ✓",
+        "▸ 正在结算副本数据...",
+        "▸ 结算完成，奖励已发放 ✓",
         "",
-        "  ── 任务推进 ──",
-        f"  主线通关：{main_completed} / {main_total}",
-        f"  支线通关：{side_completed} / {side_total}",
-        f"  今日获得积分：+{points_today}",
+        "  ── 通关统计 ──",
+        f"  主线：{main_completed} / {main_total}",
+        f"  支线：{side_completed} / {side_total}",
+        f"  获得积分：+{points_today}",
     ]
 
     # Completed
@@ -85,12 +82,12 @@ def render_daily_settlement(result: dict, player_name: str | None = None) -> str
 def _pick_closing(main_completed: int, side_completed: int, points_today: int) -> str:
     total = main_completed + side_completed
     if total == 0:
-        return "今天没有结算到任务，但只要还在记录就不算掉线——明天继续。"
+        return "今天没有通关记录，但只要还在记录就不算掉线。明日副本继续。"
     if points_today >= 100:
-        return "今天推进密度很高，注意收尾后让自己休息。明天副本见。"
+        return "今天推进密度很高，注意收尾休息。明日副本见。"
     if main_completed > 0:
-        return "主线推进到位，明天继续保持节奏。"
-    return "支线打稳就是稳赢的一天，明天挑个主线试试。"
+        return "主线推进到位，明日继续保持节奏。"
+    return "支线打稳也是稳赢的一天，明日挑个主线试试。"
 
 
 def _render_failure(result: dict, default: str) -> str:

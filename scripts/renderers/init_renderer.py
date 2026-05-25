@@ -131,9 +131,8 @@ def render_apply_init_config(result: dict) -> str:
     grace = profile.get("early_bird_grace_minutes", 30)
 
     return join_lines([
-        "▸ 玩家数据写入完成 ✓",
+        f"叮！欢迎 {name} 玩家登入地球 Online 系统 ✓",
         "",
-        f"  玩家 {name} 已登入地球 Online 系统",
         f"  所在时区：{tz}",
         f"  晨间签到窗口：{morning} ± {grace} min",
         "",
