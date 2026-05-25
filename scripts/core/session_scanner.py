@@ -71,9 +71,14 @@ class SessionScanner:
         for project_dir in project_dirs:
             if not project_dir.is_dir():
                 continue
+            # Scan session files
             candidates, session_count = self._scan_project(project_dir, limit)
             all_candidates.extend(candidates)
             scanned_sessions += session_count
+
+            # Also scan project files (CLAUDE.md, TODO, etc.)
+            file_candidates = self._scan_project_files(project_dir)
+            all_candidates.extend(file_candidates)
 
         # Deduplicate and keep top per project
         seen = set()
@@ -130,6 +135,123 @@ class SessionScanner:
                 break
 
         return candidates, session_count
+
+    def _decode_project_path(self, project_dir_name: str) -> Path | None:
+        """Decode a session directory name back to the actual project path.
+
+        Claude Code encodes paths like: D--github-projects-earth-online-skill
+        which maps to: D:/github_projects/earth-online-skill
+        """
+        # Replace -- with a placeholder, then / with -, then restore
+        # Actually the encoding is: drive letter + -- + path with -- as separators
+        parts = project_dir_name.split("--", 1)
+        if len(parts) == 2:
+            drive = parts[0]
+            # The rest uses -- as directory separator
+            path_part = parts[1].replace("--", "/")
+            candidate = Path(f"{drive}:/{path_part}")
+            if candidate.exists():
+                return candidate
+            # Try with backslashes on Windows
+            backslash_path = path_part.replace("/", "\\")
+            candidate2 = Path(f"{drive}:\\{backslash_path}")
+            if candidate2.exists():
+                return candidate2
+        return None
+
+    def _scan_project_files(self, project_dir: Path) -> list[dict]:
+        """Scan project-level files (CLAUDE.md, TODO, etc.) for task candidates."""
+        project_path = self._decode_project_path(project_dir.name)
+        if project_path is None:
+            return []
+
+        candidates = []
+        project_name = project_dir.name
+
+        # Files to check for task-like content
+        task_files = [
+            "CLAUDE.md",
+            "CLAUDE.local.md",
+            "TODO.md",
+            "ROADMAP.md",
+            "PLAN.md",
+            "DEVELOPMENT_PLAN.md",
+            "BACKLOG.md",
+            "CHANGELOG.md",
+            ".claude/CLAUDE.md",
+        ]
+
+        for file_name in task_files:
+            file_path = project_path / file_name
+            if not file_path.is_file():
+                continue
+            try:
+                content = file_path.read_text(encoding="utf-8")
+                extracted = self._extract_tasks_from_text(content, file_name)
+                for item in extracted:
+                    candidates.append({
+                        "name": item,
+                        "score": 8,  # Project file tasks are high quality
+                        "source": "session_scan",
+                        "source_detail": f"项目文件 · {project_name}（{file_name}）",
+                        "raw_text": f"来源：{file_path}",
+                    })
+            except Exception:
+                continue
+
+        return candidates
+
+    def _extract_tasks_from_text(self, text: str, source_file: str) -> list[str]:
+        """Extract task items from project file text content.
+
+        Handles markdown checkboxes, numbered lists with task keywords, and
+        bullet points that look like tasks.
+        """
+        tasks = []
+        lines = text.split("\n")
+
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            # Markdown checkbox: - [ ] or - [x] (also handle TODO items)
+            checkbox_match = re.match(r"^[-*]\s*\[[\sxX]\]\s*(.+)", stripped)
+            if checkbox_match:
+                task_text = checkbox_match.group(1).strip()
+                if len(task_text) >= _MIN_CANDIDATE_LENGTH:
+                    tasks.append(task_text)
+                continue
+
+            # Numbered/bulleted lines with task indicators
+            list_match = re.match(r"^(?:\d+[\.\)]\s*|[-*+]\s+)(.+)", stripped)
+            if list_match:
+                item_text = list_match.group(1).strip()
+                if len(item_text) >= _MIN_CANDIDATE_LENGTH and not self._is_trivial(item_text):
+                    # Check if it contains task-like keywords
+                    for pattern in _TASK_INDICATORS:
+                        if pattern.search(item_text):
+                            tasks.append(item_text)
+                            break
+                continue
+
+            # Lines that look like TODO entries
+            if re.match(r"^(?:TODO|FIXME|HACK|XXX|IDEA|NOTE)[\s:：]", stripped, re.IGNORECASE):
+                task_text = re.sub(r"^(?:TODO|FIXME|HACK|XXX|IDEA|NOTE)[\s:：]+", "", stripped, flags=re.IGNORECASE).strip()
+                if len(task_text) >= _MIN_CANDIDATE_LENGTH:
+                    tasks.append(task_text)
+                continue
+
+        # Deduplicate while preserving order
+        seen = set()
+        unique = []
+        for t in tasks:
+            key = t.strip().lower()
+            if key not in seen:
+                seen.add(key)
+                unique.append(t)
+
+        return unique[:10]  # Max 10 tasks per file
 
     def _extract_from_session(self, session_path: Path, project_name: str) -> list[dict]:
         """Extract task candidates from a session file.
