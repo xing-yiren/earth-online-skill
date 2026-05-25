@@ -125,13 +125,4 @@ PYTHONIOENCODING=utf-8 python scripts/adapter_smoke_test.py
 
 ## 下一步计划
 
-下一阶段会优先围绕两个方向推进：
-
-- 完善 Claude Code 原生体验
-  - 用真实对话测试持续打磨 `render=true` 输出
-  - 增强任务识别后的确认、修正和失败恢复体验
-  - 补充更多工具级测试
-
-- 稳定后再推进宿主接入层
-  - 保持 adapter 只负责输出统一 `host_context`
-  - 补 jiuwenclaw / openclaw 等平台的应用测试
+详见 [开发计划](docs/roadmap/DEVELOPMENT_PLAN.md) 和 [开发日志](docs/roadmap/development-log.md)。

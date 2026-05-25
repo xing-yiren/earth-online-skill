@@ -113,6 +113,93 @@
 
 ---
 
+---
+
+## 2026-04 ~ 2026-05
+
+### 本次完成
+
+**Claude Code 原生 Skill 安装与触发**
+- 在 `.claude/skills/earth-online-skill/SKILL.md` 安装项目级 skill 入口
+- Skill 能正确命中并调用 `scripts/tools/*`，优先使用工具返回的 `message`
+- 修复 CLI 参数兼容（同时支持 JSON 与 `key=value` 格式）
+
+**真实对话渲染层 (Renderer Layer)**
+- 新增 `scripts/renderers/` 目录，将结构化结果转为自然语言中文回复
+- 覆盖全部工具：晨间签到、早安播报、任务 CRUD、每日结算、奖励列表/兑换、初始化、候选导入
+- 工具统一在 `render=true` 时返回 `message` 字段
+
+**游戏化建档体验 (Game-Style Init)**
+- 重写 `init_renderer.py`：角色创建表单式界面（`╔══╗` 边框、"系统自检中..." 过渡语言）
+- 支持自动检测玩家信息（从系统/Git/会话上下文推断默认值）
+- "玩家称号"替代"称呼"，"系统检测默认值"替代"默认可用"
+- 默认名称警告：当称号仍为"玩家"时主动提示修改
+- 兼容 `confirmed_fields` 的 dict 格式传入
+
+**任务管理增强**
+- 新增 `list_active_tasks` / `update_task` / `cancel_task` 工具
+- `update_task` 支持改名、改截止时间、改积分、改类型
+- `cancel_task` 替代删除，状态标记为 cancelled
+- TaskService 的 `_match_tasks` 忽略 cancelled 任务
+
+**生存天数与成就系统**
+- `AchievementService` 新增 `active_dates` 追踪
+- `survival_days` 基于真实活跃天数计算
+- Seed data 包含 `active_dates` 字段
+
+**CLI 命令行模式**
+- 支持 `/earth-online-skill init|checkin|tasks|create|settle|rewards|scan`
+- 支持 `地球online 任务|结算|扫描` 等中文别名
+- 在 SKILL.md 中定义命令→工具映射表
+
+**跨会话任务扫描 (Cross-Session Scanner)**
+- 新增 `scripts/core/session_scanner.py`
+- 扫描 `~/.claude/projects/*/` 下所有会话的 `.jsonl` 文件
+- 三级数据源：项目文件（CLAUDE.md/TODO.md）> 会话对话 > 项目方向摘要
+- 质量评分系统 (0-10)：任务指示词匹配 + 长度奖励 + 实质产出物 + 时间承诺
+- 琐碎模式黑名单：过滤"好的""提交commit""继续"等非任务消息
+- 项目方向级摘要：自动合成"继续推进 XX 项目"类候选
+- 安全约束：必须用户明确授权才扫描
+
+**工具基础设施**
+- `_bootstrap.py` 支持 JSON 和 `key=value` 两种参数格式
+- `print_result()` 强制 `sys.stdout.reconfigure(encoding="utf-8")` 解决 Windows 中文乱码
+- `session_scanner` 支持 `_EO_SESSION_SCAN_ROOT_OVERRIDE` 环境变量便于测试
+
+**测试体系**
+- `smoke_test.py` — 核心闭环（8 个场景，含 render 验证）
+- `dialogue_edge_smoke_test.py` — 对话边界（重复、歧义、幂等、取消）
+- `onboarding_smoke_test.py` — 初始化 + 候选导入
+- `cli_smoke_test.py` — CLI 子进程 JSON 入参验证
+- `adapter_smoke_test.py` — adapter 原型验证
+- `session_scan_smoke_test.py` — 跨会话扫描验证
+
+**候选任务导入 (Onboarding Import)**
+- `OnboardingImportService.suggest_candidates()` — 生成候选，不写任务
+- `OnboardingImportService.apply_candidates()` — 用户确认后批量写入
+- 支持 `raw_candidates` 为字符串或带字段 dict
+- 建档后**必须**推进候选导入，不停在建档消息上
+- 主动询问跨会话扫描选项
+
+**目录管理**
+- `.gitignore` 忽略 `tmp/`、`.agents/`
+- 临时文件移入 `tmp/` 目录
+
+### 当前状态
+
+- Claude Code 原生 Skill 主路径已验证可用
+- 最小核心闭环完整（签到→任务→结算→奖励）
+- 对话渲染层全部覆盖，游戏化建档风格已成型
+- 跨会话任务扫描已具备三级数据源 + 质量评分
+- 全量 smoke test 套件持续通过
+- 定位明确：优先验证 Claude Code 对话体验，adapter 层后续推进
+
+### 下一步
+
+见 `DEVELOPMENT_PLAN.md`。
+
+---
+
 ## 日志维护约定
 
 - 每个阶段完成后补一条简要记录
