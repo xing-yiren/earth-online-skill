@@ -1,6 +1,8 @@
 # Claude Code local state
 .claude/settings.local.json
 .claude/worktrees/
+.claude/scheduled_tasks.json
+.claude/scheduled_tasks.lock
 .agents/
 
 # Byte-compiled / optimized / DLL files
